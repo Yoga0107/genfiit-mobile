@@ -1,24 +1,40 @@
-// src/screens/LoginScreen.tsx
-import React, { FC } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import React, { useState } from "react";
+import { View, Text, Button, StyleSheet } from "react-native";
+import InputComponent from "../components/InputComponent";
+import ButtonComponent from "../components/ButtonComponent";
+import { useNavigation, NavigationProp } from "@react-navigation/native";
 
-interface LoginScreenProps {
+type LoginScreenProps = {
+  navigation: NavigationProp<any>;
   onLogin: () => void;
-  navigation: any;
-}
+};
 
-const LoginScreen: FC<LoginScreenProps> = ({ onLogin, navigation }) => {
+const LoginScreen: React.FC<LoginScreenProps> = ({ navigation, onLogin }) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = () => {
+    onLogin();
+    navigation.navigate("Home");
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
-      <TextInput placeholder="Username" style={styles.input} />
-      <TextInput placeholder="Password" style={styles.input} secureTextEntry />
-      <Button title="Login" onPress={onLogin} />
-      <Text
-        style={styles.registerText}
-        onPress={() => navigation.navigate('Register')}
-      >
-        Don't have an account? Register now.
+      <InputComponent
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+      />
+      <InputComponent
+        placeholder="Password"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
+      <ButtonComponent title="Login" onPress={handleLogin} />
+      <Text onPress={() => navigation.navigate("Register")}>
+        Don't have an account? Register
       </Text>
     </View>
   );
@@ -27,25 +43,12 @@ const LoginScreen: FC<LoginScreenProps> = ({ onLogin, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 20,
   },
   title: {
     fontSize: 24,
     marginBottom: 20,
-    textAlign: 'center',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
-  },
-  registerText: {
-    color: '#1E3A8A',
-    textAlign: 'center',
-    marginTop: 20,
   },
 });
 

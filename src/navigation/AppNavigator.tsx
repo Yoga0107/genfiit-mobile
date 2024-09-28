@@ -1,52 +1,58 @@
-import React, { useState, useEffect } from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import React, { useState, useEffect } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createStackNavigator } from "@react-navigation/stack";
 
-import LoginScreen from '../screens/LoginScreen';
-import HomeScreen from '../screens/HomeScreen';
-import SplashScreen from '../screens/SplashScreen';
-import ProfileScreen from '../screens/ProfileScreen';
-import RegisterScreen from '../screens/RegisterScreen';
-import BMICalculatorScreen from '../screens/BMICalculatorScreen';
+import HomeScreen from "../screens/HomeScreen";
+import ProfileScreen from "../screens/ProfileScreen";
+import LoginScreen from "../screens/LoginScreen";
+import RegisterScreen from "../screens/RegisterScreen";
+import BMICalculatorScreen from "../screens/BMICalculatorScreen";
+import SplashScreen from "../screens/SplashScreen";
 
-
-const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
+
+const BottomTabNavigation = () => (
+  <Tab.Navigator>
+    <Tab.Screen name="Home" component={HomeScreen} />
+    <Tab.Screen name="BMI Calculator" component={BMICalculatorScreen} />
+    <Tab.Screen name="Profile" component={ProfileScreen} />
+  </Tab.Navigator>
+);
 
 const AppNavigator = () => {
-  const [loading, setLoading] = useState(true);
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading and login check (e.g., checking token)
-    setTimeout(() => {
-      setLoading(false);
-    }, 2000); // Simulate 2-second loading
+    setTimeout(() => setIsLoading(false), 1000);
   }, []);
 
-  if (loading) {
-    return <SplashScreen />;
+  if (isLoading) {
+    return <SplashScreen navigation={undefined} />;
   }
 
   return (
     <NavigationContainer>
-      {!loggedIn ? (
-        <Stack.Navigator>
-          {/* Pass navigation and props */}
-          <Stack.Screen name="Login" options={{ headerShown: false }}>
-            {props => <LoginScreen {...props} onLogin={() => setLoggedIn(true)} />}
-          </Stack.Screen>
-          <Stack.Screen name="Register" component={RegisterScreen} />
-        </Stack.Navigator>
-      ) : (
-        <Tab.Navigator>
-          <Tab.Screen name="Home" component={HomeScreen} />
-          <Tab.Screen name="Profile" component={ProfileScreen} />
-          <Tab.Screen name="BMI Calculator" component={BMICalculatorScreen} />
-
-        </Tab.Navigator>
-      )}
+      <Stack.Navigator>
+        {!isLoggedIn ? (
+          <>
+            <Stack.Screen name="Login" options={{ headerShown: false }}>
+              {(props) => (
+                <LoginScreen {...props} onLogin={() => setIsLoggedIn(true)} />
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="Register" component={RegisterScreen} />
+          </>
+        ) : (
+          <Stack.Screen
+            name="Main"
+            component={BottomTabNavigation}
+            options={{ headerShown: false }}
+          />
+        )}
+      </Stack.Navigator>
     </NavigationContainer>
   );
 };

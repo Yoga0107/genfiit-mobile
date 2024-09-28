@@ -1,11 +1,17 @@
-import React from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 
-const SplashScreen = () => {
+const SplashScreen = ({ navigation }) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigation.replace('Login'); 
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [navigation]);
+
   return (
     <View style={styles.container}>
-      <ActivityIndicator size="large" color="#1E3A8A" />
-      <Text style={styles.text}>Loading...</Text>
+      <Text style={styles.title}>Welcome to GenFiit!</Text>
     </View>
   );
 };
@@ -17,10 +23,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#1E3A8A',
   },
-  text: {
-    color: 'white',
-    marginTop: 20,
-    fontSize: 18,
+  title: {
+    fontSize: 24,
+    color: '#ffffff',
   },
 });
 

@@ -4,7 +4,8 @@ import { View, Text, StyleSheet } from 'react-native';
 const HomeScreen = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Welcome to the Home Screen!</Text>
+      <Text style={styles.title}>Home</Text>
+      <Text>Welcome to the GenFiit App!</Text>
     </View>
   );
 };
@@ -15,8 +16,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  text: {
-    fontSize: 20,
+  title: {
+    fontSize: 24,
   },
 });
 

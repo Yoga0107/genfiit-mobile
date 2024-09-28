@@ -1,21 +1,22 @@
-// src/screens/RegisterScreen.tsx
-import React from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import InputComponent from '../components/InputComponent';
+import ButtonComponent from '../components/ButtonComponent';
 
-const RegisterScreen = ({ navigation }: any) => {
+const RegisterScreen = ({ navigation }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleRegister = () => {
+    navigation.navigate('Login');
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Register</Text>
-      <TextInput placeholder="Username" style={styles.input} />
-      <TextInput placeholder="Email" style={styles.input} keyboardType="email-address" />
-      <TextInput placeholder="Password" style={styles.input} secureTextEntry />
-      <Button title="Register" onPress={() => alert('Registered!')} />
-      <Text
-        style={styles.loginText}
-        onPress={() => navigation.navigate('Login')}
-      >
-        Already have an account? Log in here.
-      </Text>
+      <InputComponent placeholder="Email" value={email} onChangeText={setEmail} />
+      <InputComponent placeholder="Password" secureTextEntry value={password} onChangeText={setPassword} />
+      <ButtonComponent title="Register" onPress={handleRegister} />
     </View>
   );
 };
@@ -29,19 +30,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     marginBottom: 20,
-    textAlign: 'center',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
-  },
-  loginText: {
-    color: '#1E3A8A',
-    textAlign: 'center',
-    marginTop: 20,
   },
 });
 

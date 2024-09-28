@@ -1,10 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, Button, StyleSheet } from 'react-native';
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation }) => {
+  const handleLogout = () => {
+    navigation.navigate('Login'); 
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>This is the Profile Screen</Text>
+      <Text style={styles.title}>Profile Screen</Text>
+      <Button title="Logout" onPress={handleLogout} />
     </View>
   );
 };
@@ -15,8 +20,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  text: {
-    fontSize: 20,
+  title: {
+    fontSize: 24,
+    marginBottom: 20,
   },
 });
 

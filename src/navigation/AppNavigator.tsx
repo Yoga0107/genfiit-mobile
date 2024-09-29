@@ -9,6 +9,7 @@ import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import BMICalculatorScreen from "../screens/BMICalculatorScreen";
 import SplashScreen from "../screens/SplashScreen";
+import InformationScreen from "../screens/InformationScreen"; 
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -26,6 +27,7 @@ const AppNavigator = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Simulate a loading time
     setTimeout(() => setIsLoading(false), 1000);
   }, []);
 
@@ -36,6 +38,8 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator>
+        <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Information" component={InformationScreen} options={{ headerShown: false }} />
         {!isLoggedIn ? (
           <>
             <Stack.Screen name="Login" options={{ headerShown: false }}>
@@ -47,7 +51,7 @@ const AppNavigator = () => {
           </>
         ) : (
           <Stack.Screen
-            name="Main"
+            name="Home"
             component={BottomTabNavigation}
             options={{ headerShown: false }}
           />

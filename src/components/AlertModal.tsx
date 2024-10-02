@@ -12,9 +12,8 @@ const AlertModal: React.FC<AlertModalProps> = ({ visible, message, onClose }) =>
 
   useEffect(() => {
     if (visible) {
-      // Slide down the modal when it becomes visible
       Animated.timing(translateY, {
-        toValue: 0, // Move to original position
+        toValue: 0, 
         duration: 300,
         useNativeDriver: true,
       }).start();
@@ -28,7 +27,7 @@ const AlertModal: React.FC<AlertModalProps> = ({ visible, message, onClose }) =>
         }).start(onClose);
       }, 3000); // Change duration as needed
 
-      return () => clearTimeout(timer); // Clean up the timer on unmount
+      return () => clearTimeout(timer); 
     }
   }, [visible, translateY, onClose]);
 

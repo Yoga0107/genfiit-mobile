@@ -1,4 +1,3 @@
-// SuccessModal.tsx
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, Animated } from 'react-native';
 
@@ -14,7 +13,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ visible, onClose }) => {
 
   useEffect(() => {
     if (visible) {
-      // Animate modal scaling in
+      
       Animated.spring(scaleValue, {
         toValue: 1,
         friction: 3,
@@ -22,7 +21,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ visible, onClose }) => {
         useNativeDriver: true,
       }).start();
 
-      // Animate checkmark drawing effect
+      
       Animated.sequence([
         Animated.timing(checkmarkOpacity, {
           toValue: 1,
@@ -34,9 +33,8 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ visible, onClose }) => {
           duration: 300,
           useNativeDriver: true,
         }),
-        Animated.delay(500), // Wait for a moment after checkmark animation
+        Animated.delay(500), 
       ]).start(() => {
-        // Automatically close the modal after the animations
         setTimeout(onClose, 500);
       });
     }
@@ -89,7 +87,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   checkmark: {
-    fontSize: 80, // Increased checkmark size
+    fontSize: 80, 
   },
 });
 

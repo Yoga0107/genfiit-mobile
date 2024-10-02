@@ -7,7 +7,7 @@ interface InputComponentProps {
   value: string;
   onChangeText: (text: string) => void;
   secureTextEntry?: boolean; // For password field
-  keyboardType?: "default" | "email-address" | "numeric" | "phone-pad"; // Specify keyboard type
+  keyboardType?: "default" | "email-address" | "numeric" | "phone-pad"; 
 }
 
 const InputComponent: React.FC<InputComponentProps> = ({
@@ -15,7 +15,7 @@ const InputComponent: React.FC<InputComponentProps> = ({
   value,
   onChangeText,
   secureTextEntry = false,
-  keyboardType = "default", // Default keyboard type
+  keyboardType = "default", 
 }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(!secureTextEntry);
 
@@ -31,7 +31,7 @@ const InputComponent: React.FC<InputComponentProps> = ({
         value={value}
         onChangeText={onChangeText}
         secureTextEntry={!isPasswordVisible && secureTextEntry}
-        keyboardType={keyboardType} // Set the keyboard type
+        keyboardType={keyboardType} 
       />
       {secureTextEntry && (
         <TouchableOpacity onPress={togglePasswordVisibility} style={styles.iconContainer}>

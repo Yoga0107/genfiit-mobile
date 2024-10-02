@@ -15,18 +15,18 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({ title, onPress }) => 
 const styles = StyleSheet.create({
   button: {
     backgroundColor: '#18B2A0',
-    paddingVertical: 15, // Adjust vertical padding
-    paddingHorizontal: 25, // Adjust horizontal padding
-    borderRadius: 25, // More rounded
+    paddingVertical: 15,
+    paddingHorizontal: 25,
+    borderRadius: 25,
     marginVertical: 10,
-    alignSelf: 'center', // Center the button
-    minWidth: '60%', // Set a minimum width
-    maxWidth: '80%', // Set a maximum width
+    alignSelf: 'center',
+    minWidth: '60%',
+    maxWidth: '80%',
   },
   buttonText: {
     color: '#fff',
     textAlign: 'center',
-    fontSize: 16, // Adjust font size for better readability
+    fontSize: 16,
   },
 });
 

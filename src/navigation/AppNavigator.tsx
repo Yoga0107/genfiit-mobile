@@ -29,13 +29,13 @@ const AppNavigator = () => {
         <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Information" component={InformationScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Login" options={{ headerShown: false }}>
-          {({ navigation }) => (  // Destructure navigation here
+          {({ navigation }) => (  
             <LoginScreen
-              onLogin={() => navigation.navigate('MainTabs')} // Use navigation directly
+              onLogin={() => navigation.navigate('MainTabs')}
             />
           )}
         </Stack.Screen>
-        <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen name="Register" component={RegisterScreen} options={{headerShown: false}} />
         <Stack.Screen
           name="MainTabs"
           component={BottomTabNavigation}

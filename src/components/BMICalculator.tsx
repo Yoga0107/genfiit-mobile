@@ -8,7 +8,7 @@ const BMICalculator: React.FC = () => {
   const [category, setCategory] = useState('');
 
   const calculateBMI = () => {
-    const h = parseFloat(height) / 100; // height in meters
+    const h = parseFloat(height) / 100; 
     const w = parseFloat(weight);
     const bmiValue = w / (h * h);
     setBmi(bmiValue);

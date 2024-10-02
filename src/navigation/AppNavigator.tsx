@@ -16,7 +16,7 @@ const Tab = createBottomTabNavigator();
 
 const BottomTabNavigation = () => (
   <Tab.Navigator>
-    <Tab.Screen name="Home" component={HomeScreen} />
+    <Tab.Screen name="Home" component={HomeScreen} options={{headerShown: false}} />
     <Tab.Screen name="BMI Calculator" component={BMICalculatorScreen} />
     <Tab.Screen name="Profile" component={ProfileScreen} />
   </Tab.Navigator>

@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image, Linking } from "react-native";
 import Checkbox from "expo-checkbox";
-import InputComponent from "../components/InputComponent"; // Updated InputComponent
+import InputComponent from "../components/InputComponent"; 
 import ButtonComponent from "../components/ButtonComponent";
 import ResponsiveContainer from "../components/ResponsiveContainer";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
-import AlertModal from '../components/AlertModal'; // Import AlertModal
-import SuccessModal from '../components/SuccessModal'; // Import SuccessModal
+import AlertModal from '../components/AlertModal';
+import SuccessModal from '../components/SuccessModal'; 
 
 const RegisterScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<any>>();
@@ -16,9 +16,9 @@ const RegisterScreen: React.FC = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agree, setAgree] = useState(false);
-  const [alertVisible, setAlertVisible] = useState(false); // State for alert modal
-  const [alertMessage, setAlertMessage] = useState(''); // State for alert message
-  const [successVisible, setSuccessVisible] = useState(false); // State for success modal
+  const [alertVisible, setAlertVisible] = useState(false); 
+  const [alertMessage, setAlertMessage] = useState(''); 
+  const [successVisible, setSuccessVisible] = useState(false);
 
   const handleRegister = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email validation regex
@@ -51,14 +51,14 @@ const RegisterScreen: React.FC = () => {
       return;
     }
 
-    // If registration is successful
+
     setSuccessVisible(true);
 
-    // Automatically navigate after the modal closes
+
     setTimeout(() => {
       setSuccessVisible(false);
       navigation.navigate("Login");
-    }, 2000); // Adjust the duration as needed
+    }, 2000); 
   };
 
   const openTerms = () => {
@@ -84,7 +84,7 @@ const RegisterScreen: React.FC = () => {
           placeholder="Email" 
           value={email} 
           onChangeText={setEmail} 
-          keyboardType="email-address" // Set keyboard type to email
+          keyboardType="email-address" 
         />
         
         <InputComponent 

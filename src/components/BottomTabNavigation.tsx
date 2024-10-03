@@ -1,7 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/HomeScreen';
-import ProfileScreen from '../screens/ProfileScreen';
+import ProfileScreen from '../screens/ApplicationScreen';
 import BMICalculatorScreen from '../screens/BMICalculatorScreen';
 
 const Tab = createBottomTabNavigator();

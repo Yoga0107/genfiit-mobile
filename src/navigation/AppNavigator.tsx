@@ -4,21 +4,23 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 
 import HomeScreen from "../screens/HomeScreen";
-import ProfileScreen from "../screens/ProfileScreen";
+import ApplicationScreen from "../screens/ApplicationScreen"; 
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import BMICalculatorScreen from "../screens/BMICalculatorScreen";
 import SplashScreen from "../screens/SplashScreen";
 import InformationScreen from "../screens/InformationScreen";
+import EditProfileScreen from "../screens/EditProfileScreen";
+import BMICalculator from "../components/BMICalculator";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const BottomTabNavigation = () => (
   <Tab.Navigator>
-    <Tab.Screen name="Home" component={HomeScreen} options={{headerShown: false}} />
+    <Tab.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
     <Tab.Screen name="BMI Calculator" component={BMICalculatorScreen} />
-    <Tab.Screen name="Profile" component={ProfileScreen} />
+    <Tab.Screen name="Profile" component={ApplicationScreen} />
   </Tab.Navigator>
 );
 
@@ -35,12 +37,15 @@ const AppNavigator = () => {
             />
           )}
         </Stack.Screen>
-        <Stack.Screen name="Register" component={RegisterScreen} options={{headerShown: false}} />
+        <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
         <Stack.Screen
           name="MainTabs"
           component={BottomTabNavigation}
           options={{ headerShown: false }}
         />
+        {/* Gunakan nama yang sama untuk konsistensi */}
+        <Stack.Screen name="BMI Calculator" component={BMICalculatorScreen} options={{ headerShown: true }} />
+        <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ headerShown: true, title: 'Edit Profile' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

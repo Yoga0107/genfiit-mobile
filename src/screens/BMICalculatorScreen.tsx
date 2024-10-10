@@ -12,7 +12,7 @@ type BMIData = {
   "+3SD": number;
 };
 
-type ReferenceBMIData = {
+type ReferenceBMIData= {
   boys: Record<number, BMIData>;
   girls: Record<number, BMIData>;
 };

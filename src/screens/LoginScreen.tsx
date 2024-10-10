@@ -1,11 +1,12 @@
 import React, { useContext, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from "react-native";
 import InputComponent from "../components/InputComponent";
 import ButtonComponent from "../components/ButtonComponent";
 import ResponsiveContainer from "../components/ResponsiveContainer";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import { LoadingContext } from "../context/LoadingContext"; 
 import LoadingComponent from "../components/LoadingComponent"; 
+import { LoginApi } from "../api/Auth";
 
 type LoginScreenProps = {
   onLogin: () => void;
@@ -21,8 +22,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
   const handleLogin = async () => {
     loadingContext?.setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      onLogin();
+      // Make login request using the email and password as identifier and password
+      const response = await LoginApi({ 
+        identifier: email, // use identifier as email
+        password: password 
+      });
+      // console.log('Login successful:', response);
+  
+      onLogin(); // Perform additional actions after login if needed
       navigation.navigate("MainTabs");
     } catch (error) {
       console.error("Login failed", error);
@@ -30,6 +37,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
       loadingContext?.setLoading(false);
     }
   };
+  
 
   return (
     <ResponsiveContainer>
@@ -51,9 +59,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
           value={password}
           onChangeText={setPassword}
         />
-        <TouchableOpacity style={styles.forgotPasswordContainer}>
-          <Text style={styles.forgotPasswordText}>Lupa Kata Sandi?</Text>
-        </TouchableOpacity>
         <ButtonComponent title="Masuk" onPress={handleLogin} />
         <TouchableOpacity onPress={() => navigation.navigate("Register")}>
           <Text style={styles.registerText}>
@@ -88,13 +93,6 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: "#777",
-    marginBottom: 20,
-  },
-  forgotPasswordContainer: {
-    alignItems: "flex-end",
-  },
-  forgotPasswordText: {
-    color: "#0FA18C",
     marginBottom: 20,
   },
   registerText: {

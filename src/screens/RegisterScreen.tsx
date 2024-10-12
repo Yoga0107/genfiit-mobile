@@ -12,7 +12,7 @@ const RegisterScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<any>>();
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("+62");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agree, setAgree] = useState(false);
@@ -20,17 +20,25 @@ const RegisterScreen: React.FC = () => {
   const [alertMessage, setAlertMessage] = useState(''); 
   const [successVisible, setSuccessVisible] = useState(false);
 
+  const handlePhoneNumberChange = (value: string) => {
+    if (!value.startsWith("+62")) {
+      setPhoneNumber("+62");
+    } else {
+      setPhoneNumber(value);
+    }
+  };
+
   const handleRegister = () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email validation regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
     if (!emailRegex.test(email)) {
       setAlertMessage('Harap masukkan format email yang valid.');
       setAlertVisible(true);
       return;
     }
-    
-    // Validate phone number format
-    if (!phoneNumber.startsWith('+62') || phoneNumber.length < 13) {
-      setAlertMessage('Harap masukkan nomor HP dengan format +62 dan lebih dari 12 digit.');
+
+ 
+    if (phoneNumber.length < 13) {
+      setAlertMessage('Harap masukkan nomor HP yang valid dengan format +62 dan lebih dari 12 digit.');
       setAlertVisible(true);
       return;
     }
@@ -51,10 +59,8 @@ const RegisterScreen: React.FC = () => {
       return;
     }
 
-
+    // Success registration flow
     setSuccessVisible(true);
-
-
     setTimeout(() => {
       setSuccessVisible(false);
       navigation.navigate("Login");
@@ -92,14 +98,14 @@ const RegisterScreen: React.FC = () => {
           value={username} 
           onChangeText={setUsername} 
         />
-<InputComponent 
-  placeholder="+62 8129 9090 466" 
-  value={phoneNumber} 
-  onChangeText={setPhoneNumber} 
-  keyboardType="phone-pad" // Set keyboard type to phone
-/>
-
         
+        <InputComponent 
+          placeholder="Nomor HP (+62)" 
+          value={phoneNumber} 
+          onChangeText={handlePhoneNumberChange} 
+          keyboardType="phone-pad" 
+        />
+
         <InputComponent 
           placeholder="Password" 
           secureTextEntry 
@@ -137,14 +143,12 @@ const RegisterScreen: React.FC = () => {
           </Text>
         </TouchableOpacity>
 
-        {/* Alert modal for error messages */}
         <AlertModal
           visible={alertVisible}
           message={alertMessage}
           onClose={() => setAlertVisible(false)}
         />
 
-        {/* Success modal for registration success */}
         <SuccessModal
           visible={successVisible}
           onClose={() => setSuccessVisible(false)}

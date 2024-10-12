@@ -14,7 +14,7 @@
     "production": {
       "autoIncrement": true
     },
-    "apk": {  // Profil khusus untuk APK
+    "apk": { 
       "distribution": "internal"
     }
   },

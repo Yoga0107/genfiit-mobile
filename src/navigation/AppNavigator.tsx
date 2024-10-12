@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -11,7 +11,7 @@ import BMICalculatorScreen from "../screens/BMICalculatorScreen";
 import SplashScreen from "../screens/SplashScreen";
 import InformationScreen from "../screens/InformationScreen";
 import EditProfileScreen from "../screens/EditProfileScreen";
-import BMICalculator from "../components/BMICalculator";
+import { getToken } from '../utils/handlingDataLogin'; // Import getToken
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -25,9 +25,20 @@ const BottomTabNavigation = () => (
 );
 
 const AppNavigator = () => {
+  const [initialRoute, setInitialRoute] = useState<string>('Splash'); // Set rute awal sebagai Splash
+
+  useEffect(() => {
+    const checkToken = async () => {
+      const token = await getToken();
+      setInitialRoute(token ? 'MainTabs' : 'Login'); // Atur rute awal berdasarkan token
+    };
+
+    checkToken();
+  }, []);
+
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator initialRouteName={initialRoute}>
         <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Information" component={InformationScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Login" options={{ headerShown: false }}>
@@ -43,9 +54,8 @@ const AppNavigator = () => {
           component={BottomTabNavigation}
           options={{ headerShown: false }}
         />
-        {/* Gunakan nama yang sama untuk konsistensi */}
         <Stack.Screen name="BMI Calculator" component={BMICalculatorScreen} options={{ headerShown: true }} />
-        <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ headerShown: true, title: 'Edit Profile' }} />
+        <Stack.Screen name="Edit Profile" component={EditProfileScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

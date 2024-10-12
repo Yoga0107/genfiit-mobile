@@ -1,30 +1,89 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import ProgramCard from '../components/ProgramCard';
 import UserCard from '../components/UserCard';
 import ResponsiveContainer from '../components/ResponsiveContainer';
+import { getToken } from '../utils/handlingDataLogin';
+import ApiManager from '../api/ApiManager';
+import { calculateBMI, getNutritionalStatus } from '../utils/bmiHelper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const HomeScreen: React.FC = () => {
-  const [hasPreTest, setHasPreTest] = useState(false); 
+  const [hasPreTest, setHasPreTest] = useState(false);
+  const [userData, setUserData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState<string>('');
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = await getToken();
+        if (!token) {
+          alert('Token not found');
+          return;
+        }
+
+        const response = await ApiManager.get('/users/me', {
+          params: { populate: 'user_information' },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            accept: 'application/json',
+          },
+        });
+
+        const userDetails = response.data.user_information;
+        setUserData(response.data);
+
+        const bmi = calculateBMI(userDetails.weight, userDetails.height);
+        const nutritionalStatus = getNutritionalStatus(bmi);
+        setStatus(nutritionalStatus);
+
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const handleTelehealthPress = () => {
-    console.log("Telehealth button pressed");
+    console.log('Telehealth button pressed');
   };
+
+  const handlePreTestPress = () => {
+    console.log('Pre-Test button pressed');
+  };
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#00b4ac" />;
+  }
 
   return (
     <ResponsiveContainer>
       <View style={styles.centerContainer}>
-        <UserCard 
-          name="Abdul123" 
-          height={171} 
-          weight={64} 
-          status="Ideal" 
-        />
+        {userData && userData.user_information ? (
+          <UserCard
+            name={userData.user_information.full_name}
+            height={userData.user_information.height}
+            weight={userData.user_information.weight}
+            status={status}
+          />
+        ) : (
+          <Text>No user data available</Text>
+        )}
       </View>
 
       <TouchableOpacity style={styles.telehealthContainer} onPress={handleTelehealthPress}>
-        <Text style={styles.telehealthTitle}>Telehealth</Text>
-        <Text style={styles.telehealthDescription}>Konsultasi dengan tenaga kesehatan disini!</Text>
+        <View style={styles.iconTextContainer}>
+          <MaterialCommunityIcons name="stethoscope" size={24} color="#FDCB58" style={styles.icon} />
+          <View style={styles.textContainer}>
+            <Text style={styles.telehealthTitle}>Telehealth</Text>
+            <Text style={styles.telehealthDescription}>Konsultasi dengan tenaga kesehatan disini!</Text>
+          </View>
+        </View>
       </TouchableOpacity>
 
       <View style={styles.programContainer}>
@@ -41,36 +100,62 @@ const HomeScreen: React.FC = () => {
           </View>
         )}
       </View>
+
+      <TouchableOpacity onPress={handlePreTestPress} style={styles.ctaButton}>
+        <LinearGradient
+          colors={['#44D3B6', '#2980B9']}
+          start={[0, 0]}
+          end={[1, 1]}
+          style={styles.gradient}
+        >
+          <Text style={styles.ctaTitle}>Pre-Test</Text>
+          <Text style={styles.ctaSubtitle}>Lorem ipsum dolor sit amet!</Text>
+        </LinearGradient>
+      </TouchableOpacity>
     </ResponsiveContainer>
   );
 };
 
 const styles = StyleSheet.create({
   centerContainer: {
-    alignItems: 'center', 
-    marginBottom: 20, 
-  },
-  telehealthContainer: {
-    backgroundColor: '#e0f7fa',
-    padding: 20,
-    borderRadius: 10,
     alignItems: 'center',
     marginBottom: 20,
+  },
+  telehealthContainer: {
+    borderColor: '#00b4ac',
+    borderWidth: 2,
+    borderRadius: 25,
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    backgroundColor: '#ffffff',
+    marginBottom: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
     elevation: 5,
+  },
+  iconTextContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  textContainer: {
+    marginLeft: 10,
+    justifyContent: 'center',
+  },
+  icon: {
+    marginRight: 8,
   },
   telehealthTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#009688',
-    marginBottom: 5,
+    color: '#00b4ac',
+    textAlign: 'left',
   },
   telehealthDescription: {
     fontSize: 16,
-    color: '#444',
+    color: '#000000',
+    textAlign: 'left',
   },
   programContainer: {
     position: 'relative',
@@ -99,6 +184,27 @@ const styles = StyleSheet.create({
     color: '#009688',
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  ctaButton: {
+    marginTop: 30,
+    alignSelf: 'center',
+    width: '100%',
+  },
+  gradient: {
+    borderRadius: 25,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+  },
+  ctaTitle: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  ctaSubtitle: {
+    fontSize: 21,
+    color: '#fff',
+    marginTop: 5,
   },
 });
 

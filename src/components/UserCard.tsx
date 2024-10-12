@@ -38,15 +38,12 @@ const UserCard: React.FC<UserCardProps> = ({ name, height, weight, status }) => 
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
     width: '98%', 
     maxWidth: 450, 
     paddingHorizontal: 20,
-    paddingTop: 15,
-    paddingBottom: 8,
-    borderRadius: 30,
+    paddingTop: 20,
+    paddingBottom: 20,
+    borderRadius: 20,
     backgroundColor: '#fff',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -55,64 +52,67 @@ const styles = StyleSheet.create({
     elevation: 5,
     marginBottom: 20,
     alignSelf: 'center', 
+    borderWidth: 2,
+    borderColor: '#18b2a0',
   },
   greetingContainer: {
     flexDirection: 'column',
     alignItems: 'flex-start', 
+    marginBottom: 10,
   },
   nameContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   greeting: {
-    fontSize: 16,
+    fontSize: 18, 
     color: '#1b1b1b',
+    fontWeight: '400',
   },
   name: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: 'bold',
     color: '#18b2a0',
   },
   exclamation: {
-    fontSize: 32,
+    fontSize: 36,
     color: '#1b1b1b',
     marginLeft: 5, 
   },
   infoContainer: {
     width: '100%',
-    paddingVertical: 3,
+    paddingVertical: 10,
     borderTopWidth: 1,
     borderTopColor: '#00b4ac',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    marginBottom: 10,
+    flexDirection: 'row', // Ensures both sections are in a row
+    justifyContent: 'space-between', // Adds space between the two sections
   },
   infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '50%',
-    paddingVertical: 5,
+    flexDirection: 'row', // Puts label and value side by side
+    alignItems: 'center',
   },
   label: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#000',
-    marginRight: 30, // Menambahkan jarak antara label dan value
+    marginRight: 5, // Smaller gap between label and value
   },
   value: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#00b4ac',
+    color: '#18b2a0',
   },
   statusContainer: {
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 15,
   },
   statusLabel: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#1b1b1b',
     textAlign: 'center', 
   },
   statusValue: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: 'bold',
     color: '#18b2a0',
     textAlign: 'center', 

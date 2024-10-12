@@ -7,6 +7,7 @@ import { useNavigation, NavigationProp } from "@react-navigation/native";
 import { LoadingContext } from "../context/LoadingContext"; 
 import LoadingComponent from "../components/LoadingComponent"; 
 import { LoginApi } from "../api/Auth";
+import { saveToken } from "../utils/handlingDataLogin"; 
 
 type LoginScreenProps = {
   onLogin: () => void;
@@ -22,22 +23,28 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
   const handleLogin = async () => {
     loadingContext?.setLoading(true);
     try {
-      // Make login request using the email and password as identifier and password
       const response = await LoginApi({ 
-        identifier: email, // use identifier as email
+        identifier: email,
         password: password 
       });
-      // console.log('Login successful:', response);
-  
-      onLogin(); // Perform additional actions after login if needed
-      navigation.navigate("MainTabs");
+
+      console.log('Response from login API:', response.data); // Log the entire response
+
+      const token = response.data.jwt; // Adjusted to access the correct property
+      if (!token) {
+        throw new Error("Token tidak ditemukan dalam respons.");
+      }
+
+      await saveToken(token); // Save token after successful login
+      onLogin(); // Call onLogin function if additional logic is needed after login
+      navigation.navigate("MainTabs"); // Navigate to MainTabs
     } catch (error) {
-      console.error("Login failed", error);
+      console.error("Login failed", error); // Log error details
+      Alert.alert("Login Gagal", "Silakan periksa email dan password Anda."); // Alert for login failure
     } finally {
       loadingContext?.setLoading(false);
     }
   };
-  
 
   return (
     <ResponsiveContainer>

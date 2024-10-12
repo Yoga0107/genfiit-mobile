@@ -1,30 +1,29 @@
 import { saveToken } from "../utils/handlingDataLogin";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import ApiManager from "./ApiManager";
 
 export const LoginApi = async (input: any) => {
     try {
-        // Send the login request
-        const response = await ApiManager.post('auth/local/', {
-            identifier: input.identifier, // Use identifier for Strapi-based auth
+        const response = await ApiManager.post('/auth/local', { // Adjusted URL
+            identifier: input.identifier,
             password: input.password,
         });
 
-        console.log('API Response:', response);
+        console.log('Response from login API:', response.data); // Log the full response
 
-        // Extract token (jwt) and username from the response
         const token = response.data.jwt;
-        const username = response.data.user?.username;
+        const user = response.data.user;
 
-        if (token && username) {
-            await saveToken(token);  // Save the token
-            console.log("Token: ", token)
-            // console.log("Token and Username:", token, username);
+        if (token && user) {
+            await saveToken(token);
+            await AsyncStorage.setItem('user', JSON.stringify(user)); // Store the user data
         } else {
-            alert('Invalid login response: Missing token or username');
+            alert('Invalid login response: Missing token or user data');
         }
 
         return response;
     } catch (error: any) {
+        console.error('Login API error:', error.response || error.message); // Log error
         if (error.response && error.response.status === 401) {
             alert("Wrong username or password");
         } else {

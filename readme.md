@@ -5,7 +5,7 @@ Welcome to the GenFiit mobile application, a health and fitness app designed to 
 ## Features
 
 - **BMI Calculator**: Users can input their age, gender, weight, and height to calculate their BMI and see the corresponding category (underweight, normal, overweight, obese).
-- **Navigation**: The app includes a bottom tab navigation for seamless user experience, with a logout button for user session management.
+- **Navigation**: The app includes bottom tab navigation for a seamless user experience, with a logout button for user session management.
 - **Responsive Design**: The UI is designed to be responsive, ensuring a smooth experience across devices.
 
 ## Technologies Used
@@ -29,11 +29,37 @@ Welcome to the GenFiit mobile application, a health and fitness app designed to 
    ```bash
    git clone <repository-url>
    cd genfiit
-   
-2. **Install Dependencies**:
+
+2. **install Expo**:
+   ```bash
+   npm install -g expo-cli
+
+3. **install depedencies**:
+   ```bash
    npm install
 
-3. **Run the App using Expo**:
+4. **Run the App Using Expo**:
+   ```bash
    npx expo start
-   
-   
+
+## Building The App
+
+To build your application using EAS, ensure you have the EAS CLI installed. You can install it globally using npm:
+  1. **Install eas-cli Globally**:
+   ```bash
+   npm install -g eas-cli
+
+Development Build
+For a development build, use the following command:
+
+1. **Build Development**
+   ```bash
+   eas build --profile development
+
+2. **Production Build**
+   ```bash
+   eas build --profile production
+
+3. **APK Build**
+   ```bash
+   eas build --profile apk

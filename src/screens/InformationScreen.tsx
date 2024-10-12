@@ -1,17 +1,42 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, Image } from 'react-native';
 import ButtonComponent from '../components/ButtonComponent';
 import ResponsiveContainer from '../components/ResponsiveContainer'; 
+import { getToken } from '../utils/handlingDataLogin'; // Import getToken
+import { useNavigation, CommonActions } from '@react-navigation/native';
 
-const InformationScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
+const InformationScreen: React.FC = () => {
+  const navigation = useNavigation();
+
   const slide = {
     title: 'Welcome to GenFiit',
     description: 'GenFiit helps you track your fitness journey with ease.',
     image: require('../../assets/slide1.png'), 
   };
 
+  useEffect(() => {
+    const checkToken = async () => {
+      const token = await getToken();
+      if (token) {
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'MainTabs' }], // Navigasi ke MainTabs jika token ada
+          })
+        );
+      }
+    };
+
+    checkToken();
+  }, [navigation]);
+
   const handleContinue = () => {
-    navigation.replace('Login'); 
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'Login' }], // Navigasi ke Login jika tidak ada token
+      })
+    );
   };
 
   return (

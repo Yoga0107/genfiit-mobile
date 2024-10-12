@@ -1,7 +1,11 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import UserCard from '../components/UserCard';
+import { getToken } from '../utils/handlingDataLogin';
+import ApiManager from '../api/ApiManager';
+import { calculateBMI, getNutritionalStatus } from '../utils/bmiHelper';
+import LogoutButton from '../components/LogoutButton';
 
 type RootStackParamList = {
   EditProfile: undefined;
@@ -9,16 +13,49 @@ type RootStackParamList = {
   Login: undefined;
 };
 
-type ApplicationScreenNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  'EditProfile'
->;
+type ApplicationScreenNavigationProp = StackNavigationProp<RootStackParamList, 'EditProfile'>;
 
 type ApplicationScreenProps = {
   navigation: ApplicationScreenNavigationProp;
 };
 
 const ApplicationScreen: React.FC<ApplicationScreenProps> = ({ navigation }) => {
+  const [userData, setUserData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState<string>('');
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = await getToken();
+        if (!token) {
+          alert('Token not found');
+          return;
+        }
+
+        const response = await ApiManager.get('/users/me', {
+          params: { populate: 'user_information' },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            accept: 'application/json',
+          },
+        });
+
+        const userDetails = response.data.user_information;
+        const bmi = calculateBMI(userDetails.weight, userDetails.height);
+        const nutritionalStatus = getNutritionalStatus(bmi);
+        setStatus(nutritionalStatus);
+        setUserData(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   const handleEditProfile = () => {
     navigation.navigate('EditProfile');
   };
@@ -28,24 +65,35 @@ const ApplicationScreen: React.FC<ApplicationScreenProps> = ({ navigation }) => 
   };
 
   const handleLogout = () => {
-    navigation.navigate('Login');
+    navigation.navigate('Login'); 
   };
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#00b4ac" />;
+  }
 
   return (
     <View style={styles.container}>
-      <UserCard name="John Doe" height={180} weight={75} status="Active" />
-      
+      {userData && userData.user_information ? (
+        <UserCard
+          name={userData.user_information.full_name}
+          height={userData.user_information.height}
+          weight={userData.user_information.weight}
+          status={status}
+        />
+      ) : (
+        <Text>No user data available</Text>
+      )}
+
       <TouchableOpacity style={styles.button} onPress={handleEditProfile}>
         <Text style={styles.buttonText}>Edit Profile</Text>
       </TouchableOpacity>
-      
+
       <TouchableOpacity style={styles.button} onPress={handleBMICalculator}>
         <Text style={styles.buttonText}>BMI Calculator</Text>
       </TouchableOpacity>
-      
-      <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleLogout}>
-        <Text style={styles.buttonText}>Logout</Text>
-      </TouchableOpacity>
+
+      <LogoutButton onLogout={handleLogout} />
     </View>
   );
 };

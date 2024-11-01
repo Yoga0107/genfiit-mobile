@@ -3,12 +3,19 @@ import { TouchableOpacity, Text, StyleSheet, GestureResponderEvent } from 'react
 
 interface ButtonComponentProps {
   title: string;
-  onPress: (event: GestureResponderEvent) => void; 
+  onPress: (event: GestureResponderEvent) => void;
+  disabled?: boolean; // Add disabled prop
 }
 
-const ButtonComponent: React.FC<ButtonComponentProps> = ({ title, onPress }) => (
-  <TouchableOpacity style={styles.button} onPress={onPress}>
-    <Text style={styles.buttonText}>{title}</Text>
+const ButtonComponent: React.FC<ButtonComponentProps> = ({ title, onPress, disabled }) => (
+  <TouchableOpacity
+    style={[styles.button, disabled && styles.disabledButton]} // Change button style if disabled
+    onPress={disabled ? undefined : onPress} // Prevent onPress if disabled
+    disabled={disabled} // Disable the button
+  >
+    <Text style={[styles.buttonText, disabled && styles.disabledText]}>
+      {title}
+    </Text>
   </TouchableOpacity>
 );
 
@@ -23,10 +30,16 @@ const styles = StyleSheet.create({
     minWidth: '60%',
     maxWidth: '80%',
   },
+  disabledButton: {
+    backgroundColor: '#D3D3D3', // Grey background for disabled button
+  },
   buttonText: {
     color: '#fff',
     textAlign: 'center',
     fontSize: 16,
+  },
+  disabledText: {
+    color: '#A9A9A9', // Lighter grey for disabled text
   },
 });
 

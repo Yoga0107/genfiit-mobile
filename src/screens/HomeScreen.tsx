@@ -8,12 +8,15 @@ import ApiManager from '../api/ApiManager';
 import { calculateBMI, getNutritionalStatus } from '../utils/bmiHelper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useNavigation, NavigationProp } from "@react-navigation/native";
 
 const HomeScreen: React.FC = () => {
+  const navigation = useNavigation<NavigationProp<any>>();
   const [hasPreTest, setHasPreTest] = useState(false);
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<string>('');
+  const [error, setError] = useState(false); // Error state to handle fetch failures
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -39,9 +42,10 @@ const HomeScreen: React.FC = () => {
         const nutritionalStatus = getNutritionalStatus(bmi);
         setStatus(nutritionalStatus);
 
-        setLoading(false);
       } catch (error) {
         console.error('Error fetching user data:', error);
+        setError(true); // Set error to true if fetching fails
+      } finally {
         setLoading(false);
       }
     };
@@ -50,7 +54,7 @@ const HomeScreen: React.FC = () => {
   }, []);
 
   const handleTelehealthPress = () => {
-    console.log('Telehealth button pressed');
+    navigation.navigate('Telehealth'); 
   };
 
   const handlePreTestPress = () => {
@@ -64,7 +68,9 @@ const HomeScreen: React.FC = () => {
   return (
     <ResponsiveContainer>
       <View style={styles.centerContainer}>
-        {userData && userData.user_information ? (
+        {error ? (
+          <Text style={styles.errorText}>ERR!</Text>
+        ) : userData && userData.user_information ? (
           <UserCard
             name={userData.user_information.full_name}
             height={userData.user_information.height}
@@ -120,6 +126,12 @@ const styles = StyleSheet.create({
   centerContainer: {
     alignItems: 'center',
     marginBottom: 20,
+    paddingHorizontal: 16,
+  },
+  errorText: {
+    fontSize: 20,
+    color: 'red',
+    fontWeight: 'bold',
   },
   telehealthContainer: {
     borderColor: '#00b4ac',
@@ -158,7 +170,6 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   },
   programContainer: {
-    position: 'relative',
     width: '100%',
     marginTop: 20,
   },
@@ -166,6 +177,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     flexWrap: 'wrap',
+    paddingHorizontal: 16,
   },
   overlay: {
     position: 'absolute',
@@ -189,6 +201,7 @@ const styles = StyleSheet.create({
     marginTop: 30,
     alignSelf: 'center',
     width: '100%',
+    paddingHorizontal: 16,
   },
   gradient: {
     borderRadius: 25,

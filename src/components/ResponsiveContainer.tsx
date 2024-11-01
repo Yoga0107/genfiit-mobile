@@ -15,12 +15,12 @@ const ResponsiveContainer: React.FC<{ children: React.ReactNode }> = ({ children
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff', 
+    backgroundColor: '#fff',
   },
   container: {
     flex: 1,
-    padding: 16,
-    paddingTop: StatusBar.currentHeight ? StatusBar.currentHeight + 20 : 40, 
+    // Set padding to 0 to allow full width for the header
+    padding: 0,
   },
 });
 

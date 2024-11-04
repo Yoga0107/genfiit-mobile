@@ -4,61 +4,73 @@ import ProgramCard from '../components/ProgramCard';
 import UserCard from '../components/UserCard';
 import ResponsiveContainer from '../components/ResponsiveContainer';
 import { getToken } from '../utils/handlingDataLogin';
+import { getID } from '../utils/handlingDataRegister';  
 import ApiManager from '../api/ApiManager';
 import { calculateBMI, getNutritionalStatus } from '../utils/bmiHelper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation, NavigationProp } from "@react-navigation/native";
+import axios from 'axios';
 
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<any>>();
-  const [hasPreTest, setHasPreTest] = useState(false);
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<string>('');
-  const [error, setError] = useState(false); // Error state to handle fetch failures
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const token = await getToken();
-        if (!token) {
-          alert('Token not found');
+        const userId = await getID();
+        console.log("Token:", token);
+        console.log("User ID:", userId);
+        
+        if (!token || !userId) {
+          alert('Token or user ID not found');
           return;
         }
-
-        const response = await ApiManager.get('/users/me', {
-          params: { populate: 'user_information' },
+    
+        const url = `https://api-genfiit.yanginibeda.web.id/api/user-details/${userId}?populate=*`;
+        console.log("Fetching user data from:", url);
+    
+        const response = await axios.get(url, {
           headers: {
             Authorization: `Bearer ${token}`,
             accept: 'application/json',
           },
         });
-
-        const userDetails = response.data.user_information;
-        setUserData(response.data);
-
-        const bmi = calculateBMI(userDetails.weight, userDetails.height);
-        const nutritionalStatus = getNutritionalStatus(bmi);
-        setStatus(nutritionalStatus);
-
+    
+        if (response.data && response.data.data) {
+          const userDetails = response.data.data.attributes.information;
+          setUserData(userDetails);
+    
+          const bmi = calculateBMI(userDetails.weight, userDetails.height);
+          const nutritionalStatus = getNutritionalStatus(bmi);
+          setStatus(nutritionalStatus);
+        } else {
+          throw new Error('User data not found');
+        }
+    
       } catch (error) {
-        console.error('Error fetching user data:', error);
-        setError(true); // Set error to true if fetching fails
+        if (axios.isAxiosError(error)) {
+          console.error('Error fetching user data:', error.response?.data || error.message);
+        } else {
+          console.error('Unexpected error:', error);
+        }
+        setError(true);
       } finally {
         setLoading(false);
       }
     };
-
+    
+    
     fetchUserData();
   }, []);
 
   const handleTelehealthPress = () => {
     navigation.navigate('Telehealth'); 
-  };
-
-  const handlePreTestPress = () => {
-    console.log('Pre-Test button pressed');
   };
 
   if (loading) {
@@ -69,12 +81,12 @@ const HomeScreen: React.FC = () => {
     <ResponsiveContainer>
       <View style={styles.centerContainer}>
         {error ? (
-          <Text style={styles.errorText}>ERR!</Text>
-        ) : userData && userData.user_information ? (
+          <Text style={styles.errorText}>Error fetching user data!</Text>
+        ) : userData ? (
           <UserCard
-            name={userData.user_information.full_name}
-            height={userData.user_information.height}
-            weight={userData.user_information.weight}
+            name={userData.full_name}
+            height={userData.height}
+            weight={userData.weight}
             status={status}
           />
         ) : (
@@ -99,15 +111,9 @@ const HomeScreen: React.FC = () => {
           <ProgramCard completed={3} total={10} />
           <ProgramCard completed={8} total={10} />
         </View>
-
-        {!hasPreTest && (
-          <View style={styles.overlay}>
-            <Text style={styles.overlayText}>Anda belum melakukan pre-test</Text>
-          </View>
-        )}
       </View>
 
-      <TouchableOpacity onPress={handlePreTestPress} style={styles.ctaButton}>
+      <TouchableOpacity style={styles.ctaButton}>
         <LinearGradient
           colors={['#44D3B6', '#2980B9']}
           start={[0, 0]}
@@ -178,24 +184,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     flexWrap: 'wrap',
     paddingHorizontal: 16,
-  },
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1,
-    borderRadius: 10,
-  },
-  overlayText: {
-    fontSize: 18,
-    color: '#009688',
-    fontWeight: 'bold',
-    textAlign: 'center',
   },
   ctaButton: {
     marginTop: 30,

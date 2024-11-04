@@ -32,3 +32,51 @@ export const LoginApi = async (input: any) => {
         throw error;
     }
 };
+
+
+export const RegisterApi = async (input: any) => {
+    try {
+      const response = await ApiManager.post('/auth/local/register', {
+        username: input.username,
+        email: input.email,
+        password: input.password,
+        phone: input.phone,
+      });
+      
+      console.log('Response from register API:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Register API error:', error.response || error.message);
+      throw error;
+    }
+  };
+
+  export const UserDetailApi = async (userDetails: any, token: string, userId: string) => {
+    try {
+      const response = await ApiManager.post('/user-details', {
+        data: {
+          information: {
+            full_name: userDetails.full_name,
+            height: userDetails.height,
+            weight: userDetails.weight,
+            age: userDetails.age,
+            dob: userDetails.dob,
+            gender: userDetails.gender,
+          },
+          users_permissions_user: userId,
+        },
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      console.log('Response from user details API:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error submitting user details:", error.response || error.message);
+      throw error; // Propagate the error for handling in the calling function
+    }
+  };
+  

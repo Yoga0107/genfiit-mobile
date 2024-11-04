@@ -1,18 +1,22 @@
-import ApiManager from './ApiManager';  // Import ApiManager to handle requests
-import { getToken } from '../utils/handlingDataLogin';  // Import getToken to retrieve the saved token
+import { getToken } from '../utils/handlingDataLogin';
+import { getID } from '../utils/handlingDataRegister';
+import ApiManager from './ApiManager';  
 
-export const getUserDetails = async (token: string) => {
+export const getUserDetails = async () => {
   try {
-    const response = await ApiManager.get('users/me?populate=user_information', {
+    const token = await getToken();
+    const userId = await getID(); 
+
+    const response = await ApiManager.get(`user-details/${userId}?populate=*`, {  
       headers: {
-        Authorization: `Bearer ${token}`,  // Pass the token as a bearer token in the headers
+        Authorization: `Bearer ${token}`,  
         accept: 'application/json',
       },
     });
-    
-    return response.data;  // Return the response data containing user information
+
+    return response.data;
   } catch (error) {
     console.error('Error fetching user details:', error);
-    throw error;  // Throw error to handle it in the calling component
+    throw error; 
   }
 };

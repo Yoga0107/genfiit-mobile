@@ -6,7 +6,7 @@ const saveToken = async (value: string) => {
   }
   try {
     await AsyncStorage.setItem('token', value);
-    console.log("Token saved:", value); // Log the token
+    console.log("Token saved:", value); 
   } catch (e) {
     alert(`Saving data failed: ${e}`);
   }

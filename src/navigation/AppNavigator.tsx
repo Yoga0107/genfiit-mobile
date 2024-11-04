@@ -21,6 +21,7 @@ import LearningSessionScreen from '../screens/LearningSessionScreen';
 import { getToken } from '../utils/handlingDataLogin'; 
 import TelehealthScreen from '../screens/TelehealthScreen';
 import MedicalProfessionalSelectionScreen from '../screens/MedicalProfessionalSelectionScreen';
+import UserDetailScreen from '../screens/UserDetailScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -31,6 +32,7 @@ export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   MainTabs: undefined;
+  UserDetailScreen: undefined;
   LearningSession: { topic: string; segmentIds: string[] }; 
   GiziMaterial: { id: string }; 
   MentalHealthMaterial: { id: string }; 
@@ -114,6 +116,7 @@ const AppNavigator: React.FC = () => {
           )}
         </Stack.Screen>
         <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="UserDetailScreen" component={UserDetailScreen} options={{ headerShown: true }} /> 
         <Stack.Screen
           name="MainTabs"
           component={BottomTabNavigation}

@@ -13,7 +13,7 @@ const fetchMaterials = async () => {
     
     const response = await axios.get('https://api-genfiit.yanginibeda.web.id/api/materials', {
       headers: {
-        'accept': 'application/json', // Add this header
+        'accept': 'application/json', 
         Authorization: `Bearer ${token}`,
       },
     });
@@ -32,6 +32,5 @@ const fetchMaterials = async () => {
   }
 };
 
-// Add any additional functions or features for Material if needed
 
 export { fetchMaterials };

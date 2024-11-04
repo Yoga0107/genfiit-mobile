@@ -85,17 +85,17 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#00b4ac',
     marginBottom: 10,
-    flexDirection: 'row', // Ensures both sections are in a row
-    justifyContent: 'space-between', // Adds space between the two sections
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   infoRow: {
-    flexDirection: 'row', // Puts label and value side by side
+    flexDirection: 'row',
     alignItems: 'center',
   },
   label: {
     fontSize: 18,
     color: '#000',
-    marginRight: 5, // Smaller gap between label and value
+    marginRight: 5,
   },
   value: {
     fontSize: 18,

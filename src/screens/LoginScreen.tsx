@@ -20,36 +20,36 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // const handleLogin = async () => {
-  //   loadingContext?.setLoading(true);
-  //   try {
-  //     const response = await LoginApi({ 
-  //       identifier: email,
-  //       password: password 
-  //     });
+  const handleLogin = async () => {
+    loadingContext?.setLoading(true);
+    try {
+      const response = await LoginApi({ 
+        identifier: email,
+        password: password 
+      });
 
-  //     console.log('Response from login API:', response.data); 
+      console.log('Response from login API:', response.data); 
 
-  //     const token = response.data.jwt; 
-  //     if (!token) {
-  //       throw new Error("Token tidak ditemukan dalam respons.");
-  //     }
+      const token = response.data.jwt; 
+      if (!token) {
+        throw new Error("Token tidak ditemukan dalam respons.");
+      }
 
-  //     await saveToken(token);
-  //     onLogin(); 
-  //     navigation.navigate("MainTabs"); 
-  //   } catch (error) {
-  //     console.error("Login failed", error); 
-  //     Alert.alert("Login Gagal", "Silakan periksa email dan password Anda."); // Alert for login failure
-  //   } finally {
-  //     loadingContext?.setLoading(false);
-  //   }
-  // };
+      await saveToken(token);
+      onLogin(); 
+      navigation.navigate("MainTabs"); 
+    } catch (error) {
+      console.error("Login failed", error); 
+      Alert.alert("Login Gagal", "Silakan periksa email dan password Anda."); // Alert for login failure
+    } finally {
+      loadingContext?.setLoading(false);
+    }
+  };
 
-  const handleLogin = () => {
-    onLogin();
-    navigation.navigate ("MainTabs");
-  }
+  // const handleLogin = () => {
+  //   onLogin();
+  //   navigation.navigate ("MainTabs");
+  // }
 
 
   return (

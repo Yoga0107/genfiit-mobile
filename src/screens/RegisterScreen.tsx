@@ -6,7 +6,10 @@ import ButtonComponent from "../components/ButtonComponent";
 import ResponsiveContainer from "../components/ResponsiveContainer";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import AlertModal from '../components/AlertModal';
-import SuccessModal from '../components/SuccessModal'; 
+import SuccessModal from '../components/SuccessModal';
+import { RegisterApi } from "../api/Auth";
+import { saveID } from "../utils/handlingDataRegister"; 
+import { saveToken } from "../utils/handlingDataLogin"; // Import saveToken function
 
 const RegisterScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<any>>();
@@ -28,21 +31,18 @@ const RegisterScreen: React.FC = () => {
     }
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
     if (!emailRegex.test(email)) {
       setAlertMessage('Harap masukkan format email yang valid.');
       setAlertVisible(true);
       return;
     }
-
- 
     if (phoneNumber.length < 13) {
       setAlertMessage('Harap masukkan nomor HP yang valid dengan format +62 dan lebih dari 12 digit.');
       setAlertVisible(true);
       return;
     }
-
     if (!username || !password || !confirmPassword) {
       setAlertMessage('Harap isi semua field.');
       setAlertVisible(true);
@@ -59,12 +59,37 @@ const RegisterScreen: React.FC = () => {
       return;
     }
 
-    // Success registration flow
-    setSuccessVisible(true);
-    setTimeout(() => {
-      setSuccessVisible(false);
-      navigation.navigate("Login");
-    }, 2000); 
+    try {
+      const registerData = {
+        username,
+        email,
+        password,
+        phone: phoneNumber,
+      };
+      const response = await RegisterApi(registerData);
+      
+      // Log the API response
+      console.log("API Response:", response);
+      
+      const userId = response.user.id;
+      const token = response.jwt; // Extract the token from the response
+      
+      await saveID(userId.toString()); // Call saveID to store user ID
+      await saveToken(token); // Save the token
+      
+      setSuccessVisible(true);
+      
+      // Navigate to UserDetailScreen after a delay
+      setTimeout(() => {
+        setSuccessVisible(false);
+        navigation.navigate("UserDetailScreen");
+      }, 2000); 
+    
+    } catch (error) {
+      const errMessage = (error as Error).message;
+      setAlertMessage('Registrasi gagal: ' + errMessage);
+      setAlertVisible(true);
+    }
   };
 
   const openTerms = () => {

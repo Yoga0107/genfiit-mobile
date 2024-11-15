@@ -14,7 +14,7 @@ const NotificationScreen: React.FC = () => {
 
     return (
         <ResponsiveContainer>
-            <HeaderComponent/>
+            <HeaderComponent title="Notification"/>
 
             <View style={styles.container}>
                 <NotificationBox 

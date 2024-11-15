@@ -4,7 +4,11 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 
-const HeaderComponent: React.FC = () => {
+interface HeaderComponentProps {
+  title: string;
+}
+
+const HeaderComponent: React.FC<HeaderComponentProps> = ({ title }) => {
   const navigation = useNavigation();
 
   const handleBack = () => {
@@ -16,7 +20,7 @@ const HeaderComponent: React.FC = () => {
       <TouchableOpacity onPress={handleBack} style={styles.backButton}>
         <MaterialIcons name="arrow-back" size={24} color="#fff" />
       </TouchableOpacity>
-      <Text style={styles.title}>Telehealth</Text>
+      <Text style={styles.title}>{title}</Text>
     </View>
   );
 };

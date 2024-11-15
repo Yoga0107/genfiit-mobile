@@ -17,7 +17,7 @@ const ModuleScreen: React.FC = () => {
 
   return (
     <ResponsiveContainer>
-      <HeaderComponent/>
+      <HeaderComponent title='Learning Module'/>
       <View style={styles.container}>
         <TouchableOpacity 
           style={styles.card}

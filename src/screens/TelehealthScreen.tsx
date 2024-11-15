@@ -112,7 +112,7 @@ const TelehealthScreen: React.FC = () => {
 
   return (
     <ResponsiveContainer>
-      <HeaderComponent />
+      <HeaderComponent title='Konsultasi'/>
 
       <ScrollView contentContainerStyle={styles.container}>
         {step === 1 && (

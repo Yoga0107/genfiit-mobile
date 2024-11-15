@@ -9,7 +9,7 @@ import AlertModal from '../components/AlertModal';
 import SuccessModal from '../components/SuccessModal';
 import { RegisterApi } from "../api/Auth";
 import { saveID } from "../utils/handlingDataRegister"; 
-import { saveToken } from "../utils/handlingDataLogin"; // Import saveToken function
+import { saveToken } from "../utils/handlingDataLogin"; 
 
 const RegisterScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<any>>();
@@ -68,18 +68,18 @@ const RegisterScreen: React.FC = () => {
       };
       const response = await RegisterApi(registerData);
       
-      // Log the API response
+      
       console.log("API Response:", response);
       
       const userId = response.user.id;
-      const token = response.jwt; // Extract the token from the response
+      const token = response.jwt; 
       
-      await saveID(userId.toString()); // Call saveID to store user ID
-      await saveToken(token); // Save the token
+      await saveID(userId.toString()); 
+      await saveToken(token); 
       
       setSuccessVisible(true);
       
-      // Navigate to UserDetailScreen after a delay
+      
       setTimeout(() => {
         setSuccessVisible(false);
         navigation.navigate("UserDetailScreen");

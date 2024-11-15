@@ -24,7 +24,7 @@ const deleteToken = async () => {
 const getToken = async () => {
   try {
     const token = await AsyncStorage.getItem('token');
-    console.log("Token retrieved:", token); // Log the token
+    console.log("Token retrieved:", token); 
     return token;
   } catch (e) {
     alert(`Getting data failed: ${e}`);

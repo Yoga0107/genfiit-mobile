@@ -49,11 +49,11 @@ const BottomTabNavigation = () => (
   <Tab.Navigator
     screenOptions={{
       tabBarStyle: {
-        backgroundColor: '#18B2A0', // Set background color
-        height: 60, // Reset the height of the tab bar to a normal size
+        backgroundColor: '#18B2A0',
+        height: 60, 
       },
-      tabBarActiveTintColor: '#FFFFFF', // Set active icon color to white
-      tabBarInactiveTintColor: '#B0B0B0', // Optional: Set inactive icon color
+      tabBarActiveTintColor: '#FFFFFF',
+      tabBarInactiveTintColor: '#B0B0B0',
     }}
   >
     <Tab.Screen 
@@ -62,7 +62,7 @@ const BottomTabNavigation = () => (
       options={{ 
         headerShown: false, 
         tabBarIcon: ({ color, focused }) => (
-          <Ionicons name="home" size={focused ? 36 : 24} color={color} /> // Active size 1.5x (36), inactive size (24)
+          <Ionicons name="home" size={focused ? 36 : 24} color={color} />
         ) 
       }} 
     />
@@ -71,7 +71,7 @@ const BottomTabNavigation = () => (
       component={ModuleScreen} 
       options={{ headerShown: false,
         tabBarIcon: ({ color, focused }) => (
-          <MaterialIcons name="library-books" size={focused ? 36 : 24} color={color} /> // Active size 1.5x (36), inactive size (24)
+          <MaterialIcons name="library-books" size={focused ? 36 : 24} color={color} />
         ) 
       }} 
     />

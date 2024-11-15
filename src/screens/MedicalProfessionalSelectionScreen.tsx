@@ -21,7 +21,7 @@ const MedicalProfessionalSelectionScreen: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch medical professionals data
+  
   useEffect(() => {
     const loadProfessionals = async () => {
       setLoading(true);
@@ -50,7 +50,7 @@ const MedicalProfessionalSelectionScreen: React.FC = () => {
   const handleLanjutPress = () => {
     if (selectedProfessional) {
       console.log(`Navigating to consultation with: ${selectedProfessional}`);
-      // Navigate to the consultation screen or the next step here
+      
     } else {
       alert('Please select a professional before continuing.');
     }
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
   },
   selectedCard: {
-    backgroundColor: '#E0F8F5', // Highlight selected card
+    backgroundColor: '#E0F8F5', 
   },
   iconContainer: {
     marginRight: 15,

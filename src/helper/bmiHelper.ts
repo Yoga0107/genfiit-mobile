@@ -22,15 +22,15 @@ export const getNutritionalIndex = (bmi: number): { bmi: number; nutritionalInde
   let nutritionalIndex;
 
   if (bmi < 17.0) {
-    nutritionalIndex = 1; // Severe underweight
+    nutritionalIndex = 1; 
   } else if (bmi >= 17.0 && bmi <= 18.4) {
-    nutritionalIndex = 2; // Underweight
+    nutritionalIndex = 2; 
   } else if (bmi >= 18.5 && bmi <= 25.0) {
-    nutritionalIndex = 3; // Normal weight
+    nutritionalIndex = 3; 
   } else if (bmi >= 25.1 && bmi <= 27.0) {
-    nutritionalIndex = 4; // Overweight
+    nutritionalIndex = 4; 
   } else {
-    nutritionalIndex = 5; // Obese
+    nutritionalIndex = 5; 
   }
 
   return { bmi, nutritionalIndex };

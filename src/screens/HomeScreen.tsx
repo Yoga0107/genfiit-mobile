@@ -280,13 +280,13 @@ const styles = StyleSheet.create({
   },
   imageBackground: {
     width: "100%",
-    height: 300, // Set the height to cover the header area
+    height: 300, 
     justifyContent: "center",
     alignItems: "center",
     marginTop: -50,
   },
   imageStyle: {
-    resizeMode: "cover", // Use 'cover' to ensure the image fills the header without distortion
+    resizeMode: "cover", 
   },
   logo1: {
     width: 50,

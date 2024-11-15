@@ -8,7 +8,7 @@ interface AlertModalProps {
 }
 
 const AlertModal: React.FC<AlertModalProps> = ({ visible, message, onClose }) => {
-  const translateY = useRef(new Animated.Value(-100)).current; // Start off-screen
+  const translateY = useRef(new Animated.Value(-100)).current; 
 
   useEffect(() => {
     if (visible) {
@@ -18,14 +18,14 @@ const AlertModal: React.FC<AlertModalProps> = ({ visible, message, onClose }) =>
         useNativeDriver: true,
       }).start();
 
-      // Auto-close after a few seconds
+      
       const timer = setTimeout(() => {
         Animated.timing(translateY, {
-          toValue: -100, // Move back up
+          toValue: -100, 
           duration: 300,
           useNativeDriver: true,
         }).start(onClose);
-      }, 3000); // Change duration as needed
+      }, 3000); 
 
       return () => clearTimeout(timer); 
     }

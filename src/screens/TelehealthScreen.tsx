@@ -40,7 +40,7 @@ const TelehealthScreen: React.FC = () => {
   };
 
   const handleLanjutPress = async () => {
-    // Step 1: Validasi input dan lanjut ke step 2
+    
     if (step === 1) {
       if (!fullName || !weight || !height || !gender || !dateOfBirth) {
         alert("Harap isi semua data pada langkah pertama.");
@@ -49,28 +49,28 @@ const TelehealthScreen: React.FC = () => {
       setStep(2);
     } 
   
-    // Step 2: Kirim data ke API jika sudah memilih program
+    
     else if (step === 2 && selectedProgram) {
       const age = calculateAge(dateOfBirth);
       const data = {
-        programme: selectedProgram.toLowerCase().replace(" ", "_"),  // Program yang dipilih
+        programme: selectedProgram.toLowerCase().replace(" ", "_"),  
         user: {
           name: fullName,
-          weight: parseInt(weight),  // Berat badan
-          height: parseInt(height),  // Tinggi badan
-          dob: Math.floor(dateOfBirth.getTime() / 1000),  // Konversi tanggal lahir ke epoch
-          gender: gender,  // Jenis kelamin
+          weight: parseInt(weight),  
+          height: parseInt(height),  
+          dob: Math.floor(dateOfBirth.getTime() / 1000),  
+          gender: gender,  
         }
       };
   
       try {
-        // Kirim data ke API menggunakan postTelehealthData
+        
         await postTelehealthData(data);
   
-        // Navigasi ke MedicalProfessionalSelectionScreen setelah berhasil
+        
         navigation.navigate('MedicalProfessionalSelectionScreen', { selectedProgram, age });
       } catch (error: unknown) {
-        // Menangani error dan memberi pesan
+        
         if (error instanceof Error) {
           alert("Ada masalah saat mengirimkan data, coba lagi.");
           console.error("Failed to submit telehealth data:", error.message);
@@ -80,7 +80,7 @@ const TelehealthScreen: React.FC = () => {
         }
       }
     } 
-    // Validasi jika program tidak dipilih pada Step 2
+    
     else if (step === 2 && !selectedProgram) {
       alert("Harap pilih program untuk konsultasi.");
     }

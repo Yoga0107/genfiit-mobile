@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { useRoute } from '@react-navigation/native';
-import { getMaterialById } from '../api/Material';
-import { handlingDataMaterial } from '../helper/materialHelper';
+import { getMaterialById, handlingDataMaterial } from '../helper/materialHelper';
 
 const MentalMaterialScreen = () => {
   const route = useRoute();

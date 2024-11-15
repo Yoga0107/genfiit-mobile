@@ -40,7 +40,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
       navigation.navigate("MainTabs"); 
     } catch (error) {
       console.error("Login failed", error); 
-      Alert.alert("Login Gagal", "Silakan periksa email dan password Anda."); // Alert for login failure
+      Alert.alert("Login Gagal", "Silakan periksa email dan password Anda."); 
     } finally {
       loadingContext?.setLoading(false);
     }

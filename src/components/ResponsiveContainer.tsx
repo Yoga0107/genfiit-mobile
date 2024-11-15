@@ -19,7 +19,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    // Set padding to 0 to allow full width for the header
     padding: 0,
   },
 });

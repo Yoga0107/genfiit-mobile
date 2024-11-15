@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import ApiManager from "./ApiManager";
 import axios from "axios";
 
-// Login API function
+
 export const LoginApi = async (input: { identifier: string, password: string }) => {
     try {
         const response = await ApiManager.post('/auth/local', {
@@ -35,7 +35,7 @@ export const LoginApi = async (input: { identifier: string, password: string }) 
     }
 };
 
-// Registration API function
+
 export const RegisterApi = async (input: { username: string, email: string, password: string, phone: string }) => {
     try {
         const response = await ApiManager.post('/auth/local/register', input);
@@ -47,7 +47,7 @@ export const RegisterApi = async (input: { username: string, email: string, pass
     }
 };
 
-// User Detail API function
+
 export const UserDetailApi = async (userDetails: any, token: string, userId: string) => {
     if (!token || !userId) {
         throw new Error("Token or User ID is missing");

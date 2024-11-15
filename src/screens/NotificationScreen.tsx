@@ -40,7 +40,7 @@ const NotificationScreen: React.FC = () => {
     );
 };
 
-// Define types for the props used in NotificationBox
+
 interface NotificationBoxProps {
     icon: "restaurant" | "psychology";
     date: string;

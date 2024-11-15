@@ -1,13 +1,13 @@
 import { getToken } from '../utils/handlingDataLogin';
 import { getID } from '../utils/handlingDataRegister';
-import ApiManager from './ApiManager';  
+import ApiManager from './ApiManager'; 
 
 export const getUserDetails = async () => {
   try {
     const token = await getToken();
     const userId = await getID(); 
 
-    const response = await ApiManager.get(`user-details/${userId}?populate=*`, {  
+    const response = await ApiManager.get(`/users/me?populate=user_detail.information`, {  
       headers: {
         Authorization: `Bearer ${token}`,  
         accept: 'application/json',

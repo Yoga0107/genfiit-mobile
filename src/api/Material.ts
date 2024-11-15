@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { handlingDataMaterial } from '../utils/materialHelper';
+import { handlingDataMaterial } from '../helper/materialHelper';
 import { getToken } from '../utils/handlingDataLogin';
 
 // Function to fetch all materials (you might have it in materialHelper already)

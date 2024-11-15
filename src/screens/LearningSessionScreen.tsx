@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { getMaterialById, getMaterialsBySegment, handlingDataMaterial } from '../helper/materialHelper';
+import { fetchMaterials } from '../api/Material';
+
+
 
 type LearningSessionScreenProps = {
   route: RouteProp<RootStackParamList, 'LearningSession'>;
@@ -24,21 +28,35 @@ const LearningSessionScreen: React.FC<LearningSessionScreenProps> = ({ route, na
   const { topic } = route.params;
   const segmentsData = segmentDataMap[topic];
   const [completedSegments, setCompletedSegments] = useState<boolean[]>(new Array(segmentsData.length).fill(false));
+  const [loading, setLoading] = useState(false);
 
-  const handleSegmentPress = (index: number) => {
+  const handleSegmentPress = async (index: number) => {
     if (index === completedSegments.filter(Boolean).length) {
-      setCompletedSegments((prev) => {
-        const newCompletedSegments = [...prev];
-        newCompletedSegments[index] = true;
-        return newCompletedSegments;
-      });
-
       const materialId = segmentsData[index].materialId;
+      setLoading(true);
 
-      if (topic === 'GIZI') {
-        navigation.navigate('GiziMaterial', { id: materialId });
-      } else if (topic === 'MENTAL HEALTH') {
-        navigation.navigate('MentalHealthMaterial', { id: materialId });
+      try {
+        const material = await getMaterialById(materialId);
+
+        if (material) {
+          setCompletedSegments((prev) => {
+            const newCompletedSegments = [...prev];
+            newCompletedSegments[index] = true;
+            return newCompletedSegments;
+          });
+
+          if (topic === 'GIZI') {
+            navigation.navigate('GiziMaterial', { id: materialId, material });
+          } else if (topic === 'MENTAL HEALTH') {
+            navigation.navigate('MentalHealthMaterial', { id: materialId, material });
+          }
+        } else {
+          Alert.alert('Error', 'Material not found');
+        }
+      } catch (error) {
+        Alert.alert('Error', 'Failed to load material');
+      } finally {
+        setLoading(false);
       }
     } else {
       Alert.alert('Complete the previous segment first!');
@@ -53,7 +71,7 @@ const LearningSessionScreen: React.FC<LearningSessionScreenProps> = ({ route, na
       <TouchableOpacity
         style={[styles.segment, isCompleted ? styles.completed : (isActive ? styles.active : styles.inactive)]}
         onPress={() => isActive && handleSegmentPress(index)}
-        disabled={!isActive}
+        disabled={!isActive || loading}
       >
         <Text style={styles.segmentText}>{item.title}</Text>
       </TouchableOpacity>
@@ -63,12 +81,16 @@ const LearningSessionScreen: React.FC<LearningSessionScreenProps> = ({ route, na
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Learning Segments - {topic}</Text>
-      <FlatList
-        data={segmentsData}
-        renderItem={renderSegment}
-        keyExtractor={(item) => item.id}
-        style={styles.list}
-      />
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <FlatList
+          data={segmentsData}
+          renderItem={renderSegment}
+          keyExtractor={(item) => item.id}
+          style={styles.list}
+        />
+      )}
     </View>
   );
 };

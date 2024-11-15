@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import InputComponent from '../components/InputComponent';
@@ -8,6 +8,10 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import ResponsiveContainer from '../components/ResponsiveContainer'; 
 import HeaderComponent from '../components/Header';
+import { getToken } from '../utils/handlingDataLogin';
+import { postTelehealthData } from '../api/Telehealth';
+
+const { width } = Dimensions.get('window'); 
 
 type RootStackParamList = {
   MedicalProfessionalSelectionScreen: { selectedProgram: string; age: string; };
@@ -35,16 +39,54 @@ const TelehealthScreen: React.FC = () => {
     setShowDatePicker(true);
   };
 
-  const handleLanjutPress = () => {
+  const handleLanjutPress = async () => {
+    // Step 1: Validasi input dan lanjut ke step 2
     if (step === 1) {
-      setStep(2);
-    } else if (step === 2) {
-      if (selectedProgram) {
-        const age = calculateAge(dateOfBirth);
-        navigation.navigate('MedicalProfessionalSelectionScreen', { selectedProgram, age });
+      if (!fullName || !weight || !height || !gender || !dateOfBirth) {
+        alert("Harap isi semua data pada langkah pertama.");
+        return;
       }
+      setStep(2);
+    } 
+  
+    // Step 2: Kirim data ke API jika sudah memilih program
+    else if (step === 2 && selectedProgram) {
+      const age = calculateAge(dateOfBirth);
+      const data = {
+        programme: selectedProgram.toLowerCase().replace(" ", "_"),  // Program yang dipilih
+        user: {
+          name: fullName,
+          weight: parseInt(weight),  // Berat badan
+          height: parseInt(height),  // Tinggi badan
+          dob: Math.floor(dateOfBirth.getTime() / 1000),  // Konversi tanggal lahir ke epoch
+          gender: gender,  // Jenis kelamin
+        }
+      };
+  
+      try {
+        // Kirim data ke API menggunakan postTelehealthData
+        await postTelehealthData(data);
+  
+        // Navigasi ke MedicalProfessionalSelectionScreen setelah berhasil
+        navigation.navigate('MedicalProfessionalSelectionScreen', { selectedProgram, age });
+      } catch (error: unknown) {
+        // Menangani error dan memberi pesan
+        if (error instanceof Error) {
+          alert("Ada masalah saat mengirimkan data, coba lagi.");
+          console.error("Failed to submit telehealth data:", error.message);
+        } else {
+          alert("Terjadi kesalahan yang tidak terduga.");
+          console.error("Unexpected error:", error);
+        }
+      }
+    } 
+    // Validasi jika program tidak dipilih pada Step 2
+    else if (step === 2 && !selectedProgram) {
+      alert("Harap pilih program untuk konsultasi.");
     }
   };
+  
+  
 
   const calculateAge = (dob: Date) => {
     const today = new Date();
@@ -177,26 +219,26 @@ const TelehealthScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    padding: '5%',
     flexGrow: 1,
   },
   title: {
-    fontSize: 24,
+    fontSize: width * 0.06,
     fontWeight: 'bold',
     color: '#0FA18C',
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 20,
+    fontSize: width * 0.05,
     fontWeight: 'bold',
-    marginTop: 10,
-    marginBottom: 10,
+    marginTop: '2%',
+    marginBottom: '2%',
     textAlign: 'center',
   },
   description: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     textAlign: 'center',
-    marginBottom: 30,
+    marginBottom: '5%',
     color: '#666',
   },
   datePicker: {
@@ -206,20 +248,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#0FA18C',
     borderRadius: 50,
-    padding: 15,
-    marginBottom: 20,
+    paddingVertical: '3%',
+    paddingHorizontal: '5%',
+    marginBottom: '5%',
   },
   datePickerText: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     color: '#333',
   },
   pickerContainer: {
     borderWidth: 1,
     borderColor: '#0FA18C',
     borderRadius: 50,
-    marginBottom: 20,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
+    marginBottom: '5%',
+    paddingHorizontal: '5%',
+    paddingVertical: '3%',
   },
   picker: {
     width: '100%',
@@ -229,8 +272,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#DADADA',
     borderRadius: 10,
-    padding: 15,
-    marginBottom: 20,
+    paddingVertical: '4%',
+    paddingHorizontal: '5%',
+    marginBottom: '5%',
     backgroundColor: '#FFF',
   },
   selectedButton: {
@@ -238,13 +282,13 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   programTitle: {
-    fontSize: 18,
+    fontSize: width * 0.045,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: '2%',
     color: '#0FA18C',
   },
   programDescription: {
-    fontSize: 14,
+    fontSize: width * 0.04,
     color: '#666',
   },
 });

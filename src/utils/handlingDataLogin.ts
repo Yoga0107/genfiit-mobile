@@ -15,6 +15,7 @@ const saveToken = async (value: string) => {
 const deleteToken = async () => {
   try {
     await AsyncStorage.removeItem('token');
+    console.log("Token Has Been Deleted")
   } catch (e) {
     alert(`Remove data failed: ${e}`);
   }

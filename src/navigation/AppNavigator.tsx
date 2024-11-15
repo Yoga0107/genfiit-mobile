@@ -22,6 +22,7 @@ import { getToken } from '../utils/handlingDataLogin';
 import TelehealthScreen from '../screens/TelehealthScreen';
 import MedicalProfessionalSelectionScreen from '../screens/MedicalProfessionalSelectionScreen';
 import UserDetailScreen from '../screens/UserDetailScreen';
+import NotificationScreen from '../screens/NotificationScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -34,12 +35,14 @@ export type RootStackParamList = {
   MainTabs: undefined;
   UserDetailScreen: undefined;
   LearningSession: { topic: string; segmentIds: string[] }; 
-  GiziMaterial: { id: string }; 
-  MentalHealthMaterial: { id: string }; 
+  GiziMaterial: { id: string; material: any }; 
+  MentalHealthMaterial: { id: string; material: any }; 
   BMICalculator: undefined;
   EditProfile: undefined;
   Telehealth: undefined;
   MedicalProfessionalSelectionScreen: undefined;
+  NotificationScreen: undefined;
+
 };
 
 const BottomTabNavigation = () => (
@@ -77,7 +80,7 @@ const BottomTabNavigation = () => (
       component={ForumScreen} 
       options={{ 
         tabBarIcon: ({ color, focused }) => (
-          <Ionicons name="chatbubbles" size={focused ? 36 : 24} color={color} /> // Active size 1.5x (36), inactive size (24)
+          <Ionicons name="chatbubbles" size={focused ? 36 : 24} color={color} />
         ) 
       }} 
     />
@@ -85,8 +88,9 @@ const BottomTabNavigation = () => (
       name="Application" 
       component={ApplicationScreen} 
       options={{ 
+        headerShown: false,
         tabBarIcon: ({ color, focused }) => (
-          <MaterialIcons name="apps" size={focused ? 36 : 24} color={color} /> // Active size 1.5x (36), inactive size (24)
+          <MaterialIcons name="apps" size={focused ? 36 : 24} color={color} />
         ) 
       }} 
     />
@@ -153,6 +157,7 @@ const AppNavigator: React.FC = () => {
           options={{ headerShown: false }} 
         />
          <Stack.Screen name="MedicalProfessionalSelectionScreen" component={MedicalProfessionalSelectionScreen} options={{ headerShown: false}} />
+         <Stack.Screen name="NotificationScreen" component={NotificationScreen} options={{ headerShown: false}} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -15,6 +15,7 @@ const UserCard: React.FC<UserCardProps> = ({ name, height, weight, status }) => 
         <Text style={styles.greeting}>Halo,</Text>
         <View style={styles.nameContainer}>
           <Text style={styles.name}>{name}</Text>
+          <Text style={styles.exclamation}>!</Text>
         </View>
       </View>
       <View style={styles.infoContainer}>
@@ -69,7 +70,7 @@ const styles = StyleSheet.create({
     fontWeight: '400',
   },
   name: {
-    fontSize: 24,
+    fontSize: 36,
     fontWeight: 'bold',
     color: '#18b2a0',
   },

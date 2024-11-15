@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import HTMLView from 'react-native-htmlview';
 import { useRoute } from '@react-navigation/native';
-import { getMaterialById } from '../utils/materialHelper';
-import { parseQuestions, Question } from '../utils/questionHelper'; 
+import { getMaterialById } from '../helper/materialHelper';
+import { parseQuestions, Question } from '../helper/questionHelper'; 
 
 const GiziMaterialScreen = () => {
   const route = useRoute();

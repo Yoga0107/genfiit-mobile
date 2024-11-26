@@ -23,6 +23,9 @@ import TelehealthScreen from '../screens/TelehealthScreen';
 import MedicalProfessionalSelectionScreen from '../screens/MedicalProfessionalSelectionScreen';
 import UserDetailScreen from '../screens/UserDetailScreen';
 import NotificationScreen from '../screens/NotificationScreen';
+import ChangePasswordScreen from '../screens/ChangePasswordScreen';
+import CertificateScreen from '../screens/CertificateScreen';
+
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -42,6 +45,8 @@ export type RootStackParamList = {
   Telehealth: undefined;
   MedicalProfessionalSelectionScreen: undefined;
   NotificationScreen: undefined;
+  ChangePassword: undefined;
+  Certificate: undefined;
 
 };
 
@@ -120,7 +125,7 @@ const AppNavigator: React.FC = () => {
           )}
         </Stack.Screen>
         <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="UserDetailScreen" component={UserDetailScreen} options={{ headerShown: true }} /> 
+        <Stack.Screen name="UserDetailScreen" component={UserDetailScreen} options={{ headerShown: false }} /> 
         <Stack.Screen
           name="MainTabs"
           component={BottomTabNavigation}
@@ -129,7 +134,7 @@ const AppNavigator: React.FC = () => {
         <Stack.Screen 
           name="LearningSession" 
           component={LearningSessionScreen} 
-          options={{ headerShown: true }} 
+          options={{ headerShown: false }} 
         />
         <Stack.Screen 
           name="GiziMaterial" 
@@ -144,7 +149,7 @@ const AppNavigator: React.FC = () => {
         <Stack.Screen 
           name="BMICalculator" 
           component={BMICalculatorScreen} 
-          options={{ headerShown: true }} 
+          options={{ headerShown: false }} 
         />
         <Stack.Screen 
           name="EditProfile" 
@@ -158,6 +163,8 @@ const AppNavigator: React.FC = () => {
         />
          <Stack.Screen name="MedicalProfessionalSelectionScreen" component={MedicalProfessionalSelectionScreen} options={{ headerShown: false}} />
          <Stack.Screen name="NotificationScreen" component={NotificationScreen} options={{ headerShown: false}} />
+         <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} options={{ headerShown: false}} />
+         <Stack.Screen name="Certificate" component={CertificateScreen} options={{ headerShown: false}} />
       </Stack.Navigator>
     </NavigationContainer>
   );

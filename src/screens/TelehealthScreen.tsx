@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Alert, Image } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import InputComponent from '../components/InputComponent';
@@ -40,53 +40,57 @@ const TelehealthScreen: React.FC = () => {
   };
 
   const handleLanjutPress = async () => {
-    
     if (step === 1) {
       if (!fullName || !weight || !height || !gender || !dateOfBirth) {
-        alert("Harap isi semua data pada langkah pertama.");
+        Alert.alert(
+          "Data Tidak Lengkap",
+          "Harap isi semua data pada langkah pertama sebelum melanjutkan.",
+          [{ text: "OK" }]
+        );
         return;
       }
       setStep(2);
-    } 
-  
-    
-    else if (step === 2 && selectedProgram) {
+    } else if (step === 2 && selectedProgram) {
       const age = calculateAge(dateOfBirth);
       const data = {
-        programme: selectedProgram.toLowerCase().replace(" ", "_"),  
+        programme: selectedProgram.toLowerCase().replace(" ", "_"),
         user: {
           name: fullName,
-          weight: parseInt(weight),  
-          height: parseInt(height),  
-          dob: Math.floor(dateOfBirth.getTime() / 1000),  
-          gender: gender,  
-        }
+          weight: parseInt(weight),
+          height: parseInt(height),
+          dob: Math.floor(dateOfBirth.getTime() / 1000),
+          gender: gender,
+        },
       };
   
       try {
-        
         await postTelehealthData(data);
-  
-        
         navigation.navigate('MedicalProfessionalSelectionScreen', { selectedProgram, age });
       } catch (error: unknown) {
-        
         if (error instanceof Error) {
-          alert("Ada masalah saat mengirimkan data, coba lagi.");
+          Alert.alert(
+            "Gagal Mengirim Data",
+            "Ada masalah saat mengirimkan data, coba lagi.",
+            [{ text: "OK" }]
+          );
           console.error("Failed to submit telehealth data:", error.message);
         } else {
-          alert("Terjadi kesalahan yang tidak terduga.");
+          Alert.alert(
+            "Kesalahan Tidak Terduga",
+            "Terjadi kesalahan yang tidak terduga, silakan coba lagi.",
+            [{ text: "OK" }]
+          );
           console.error("Unexpected error:", error);
         }
       }
-    } 
-    
-    else if (step === 2 && !selectedProgram) {
-      alert("Harap pilih program untuk konsultasi.");
+    } else if (step === 2 && !selectedProgram) {
+      Alert.alert(
+        "Program Belum Dipilih",
+        "Harap pilih salah satu program sebelum melanjutkan ke langkah berikutnya.",
+        [{ text: "OK" }]
+      );
     }
   };
-  
-  
 
   const calculateAge = (dob: Date) => {
     const today = new Date();
@@ -179,6 +183,8 @@ const TelehealthScreen: React.FC = () => {
         {step === 2 && (
           <>
             <Text style={styles.title}>Pilih Program</Text>
+            <Text style={styles.titleDescription}>Pilih program konsultasi yang kamu butuhkan!</Text>
+            
             <TouchableOpacity
               style={[
                 styles.programButton,
@@ -186,10 +192,16 @@ const TelehealthScreen: React.FC = () => {
               ]}
               onPress={() => setSelectedProgram('Mental Health')}
             >
-              <Text style={styles.programTitle}>Mental Health</Text>
-              <Text style={styles.programDescription}>
-                Bagi yang ingin konsultasi terkait kesehatan mental, curhat, atau bagi yang memiliki masalah dalam mengatur emosi.
-              </Text>
+              <Image 
+                source={require('../../assets/mental-notif.png')} 
+                style={styles.programLogo} 
+              />
+              <View style={styles.programTextContainer}>
+                <Text style={styles.programTitle}>Mental Health</Text>
+                <Text style={styles.programDescription}>
+                  Bagi yang ingin konsultasi terkait kesehatan mental, curhat, atau bagi yang memiliki masalah dalam mengatur emosi.
+                </Text>
+              </View>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -199,10 +211,16 @@ const TelehealthScreen: React.FC = () => {
               ]}
               onPress={() => setSelectedProgram('Nutrition')}
             >
-              <Text style={styles.programTitle}>Gizi</Text>
-              <Text style={styles.programDescription}>
-                Bagi yang memiliki masalah terkait berat badan atau gizinya.
-              </Text>
+              <Image 
+                source={require('../../assets/gizi-notif.png')} 
+                style={styles.programLogo} 
+              />
+              <View style={styles.programTextContainer}>
+                <Text style={styles.programTitle}>Gizi</Text>
+                <Text style={styles.programDescription}>
+                  Bagi yang memiliki masalah terkait berat badan atau gizinya.
+                </Text>
+              </View>
             </TouchableOpacity>
 
             <ButtonComponent 
@@ -259,12 +277,11 @@ const styles = StyleSheet.create({
   pickerContainer: {
     borderWidth: 1,
     borderColor: '#0FA18C',
-    borderRadius: 50,
+    borderRadius: 10,
     marginBottom: '5%',
-    paddingHorizontal: '5%',
-    paddingVertical: '3%',
   },
   picker: {
+    height: 50,
     width: '100%',
     color: '#333',
   },
@@ -276,10 +293,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: '5%',
     marginBottom: '5%',
     backgroundColor: '#FFF',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   selectedButton: {
     borderColor: '#0FA18C',
     borderWidth: 2,
+  },
+  programLogo: {
+    width: width * 0.2,
+    height: width * 0.2,
+    resizeMode: 'contain',
+    marginRight: 15,
+  },
+  programTextContainer: {
+    flex: 1,
   },
   programTitle: {
     fontSize: width * 0.045,
@@ -288,6 +316,12 @@ const styles = StyleSheet.create({
     color: '#0FA18C',
   },
   programDescription: {
+    fontSize: width * 0.04,
+    color: '#666',
+  },
+  titleDescription: {
+    paddingTop: 5,
+    paddingBottom: 5,
     fontSize: width * 0.04,
     color: '#666',
   },

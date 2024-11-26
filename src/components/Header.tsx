@@ -28,7 +28,7 @@ const HeaderComponent: React.FC<HeaderComponentProps> = ({ title }) => {
 const styles = StyleSheet.create({
   header: {
     paddingVertical: 16,
-    backgroundColor: '#1abc9c',
+    backgroundColor: '#009688',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     flexDirection: 'row',

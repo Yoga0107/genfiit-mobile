@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Dimensions, Image, ImageBackground } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import DetailedUserCard from '../components/DetailedUserCard';
-import { deleteToken, getToken } from '../utils/handlingDataLogin';
+import { deleteToken } from '../utils/handlingDataLogin';
 import ApiManager from '../api/ApiManager';
-import { calculateBMI, getNutritionalIndex, getNutritionalStatus } from '../helper/bmiHelper';
+import { calculateBMI, getNutritionalStatus } from '../helper/bmiHelper';
 import CustomButton from '../components/CustomButton';
 import { getUserDetails } from '../api/User';
 import ResponsiveContainer from '../components/ResponsiveContainer';
@@ -14,8 +14,10 @@ const { width, height } = Dimensions.get('window');
 
 type RootStackParamList = {
   EditProfile: undefined;
-  BMICalculatorScreen: undefined;
+  BMICalculator: undefined;
   Login: undefined;
+  ChangePassword: undefined;
+  Certificate: undefined;
 };
 
 type ApplicationScreenNavigationProp = StackNavigationProp<RootStackParamList, 'EditProfile'>;
@@ -34,18 +36,23 @@ const ApplicationScreen: React.FC<ApplicationScreenProps> = ({ navigation }) => 
     const fetchUserData = async () => {
       try {
         const data = await getUserDetails();
+        console.log('User data:', data); // Menampilkan data untuk diperiksa
+  
         const userDetails = data?.user_detail?.information;
-
+  
         if (userDetails) {
           const bmi = calculateBMI(userDetails.weight, userDetails.height);
           const nutritionalStatus = getNutritionalStatus(bmi);
+  
           setStatus(nutritionalStatus);
-
+  
           setUserData({
             name: userDetails.full_name,
             height: userDetails.height,
             weight: userDetails.weight,
             dob: new Date(userDetails.dob),
+            email: data.email,  // Mengambil email dari objek utama
+            username: data.username,  // Mengambil username dari objek utama
             status: nutritionalStatus,
           });
         } else {
@@ -58,16 +65,21 @@ const ApplicationScreen: React.FC<ApplicationScreenProps> = ({ navigation }) => 
         setLoading(false);
       }
     };
-
+  
     fetchUserData();
   }, []);
   
-  const handleEditProfile = () => {
-    navigation.navigate('EditProfile');
+  
+  const handleEditPassword = () => {
+    navigation.navigate('ChangePassword');
   };
 
   const handleBMICalculator = () => {
-    navigation.navigate('BMICalculatorScreen');
+    navigation.navigate('BMICalculator');
+  };
+
+  const handleCertficate = () => {
+    navigation.navigate('Certificate');
   };
 
   const handleLogout = async () => {
@@ -98,18 +110,24 @@ const ApplicationScreen: React.FC<ApplicationScreenProps> = ({ navigation }) => 
           {error ? (
             <Text style={styles.errorText}>ERR!</Text>
           ) : userData ? (
-            <DetailedUserCard
+            <>
+              <DetailedUserCard
                 name={userData.name}
+                email={userData.email}
+                username={userData.username}
                 height={userData.height}
                 weight={userData.weight}
                 dob={userData.dob}
-                nutritionalStatus={status}/>
+                nutritionalStatus={status}
+              />
+            </>
           ) : (
             <Text>No user data available</Text>
           )}
 
-          <CustomButton title="Edit Profile" onPress={handleEditProfile} />
+          <CustomButton title="Certificate" onPress={handleCertficate} />
           <CustomButton title="BMI Calculator" onPress={handleBMICalculator} />
+          <CustomButton title="Ganti Password" onPress={handleEditPassword} />
           <CustomButton title="Logout" onPress={handleLogout} />
         </View>
       </ScrollView>
@@ -138,21 +156,6 @@ const styles = StyleSheet.create({
     color: 'red',
     fontWeight: 'bold',
   },
-  button: {
-    backgroundColor: '#009688',
-    paddingVertical: height * 0.02,
-    paddingHorizontal: width * 0.2,
-    borderRadius: 25,
-    alignItems: 'center',
-    marginVertical: height * 0.015,
-    width: '80%',
-    elevation: 3,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: width * 0.045,
-    fontWeight: 'bold',
-  },
   imageBackground: {
     width: "100%",
     height: 300,
@@ -178,6 +181,14 @@ const styles = StyleSheet.create({
     position: "absolute",
     marginLeft: 75,
     top: -5,
+  },
+  userInfoContainer: {
+    marginTop: 20,
+  },
+  userInfoText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
   },
 });
 

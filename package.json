@@ -19,9 +19,9 @@
     "@react-navigation/stack": "^6.4.1",
     "async-storage": "^0.1.0",
     "axios": "^1.7.7",
-    "expo": "~51.0.28",
+    "expo": "~51.0.39",
     "expo-checkbox": "~3.0.0",
-    "expo-dev-client": "~4.0.28",
+    "expo-dev-client": "~4.0.29",
     "expo-linear-gradient": "~13.0.2",
     "expo-status-bar": "~1.12.1",
     "react": "18.2.0",
@@ -43,7 +43,7 @@
     "@types/react-native-htmlview": "^0.16.5",
     "@types/react-native-snap-carousel": "^3.8.11",
     "@types/react-native-vector-icons": "^6.4.18",
-    "typescript": "^5.1.3"
+    "typescript": "~5.3.3"
   },
   "private": true
 }

@@ -10,18 +10,22 @@ type DetailedUserCardProps = {
   weight: number;
   dob: Date;
   nutritionalStatus: string;
+  email: string;
+  username: string;
 };
 
-const DetailedUserCard: React.FC<DetailedUserCardProps> = ({ name, height, weight, dob, nutritionalStatus }) => {
+const DetailedUserCard: React.FC<DetailedUserCardProps> = ({ name, height, weight, dob, nutritionalStatus, email, username }) => {
   const age = new Date().getFullYear() - dob.getFullYear();
-  const bmr = calculateBMR(weight, height, age);
+  const ageAdjusted = new Date().getMonth() < dob.getMonth() ? age - 1 : age; 
+
+  const bmr = calculateBMR(weight, height, ageAdjusted);  
   const nutritionalNeeds: NutritionalNeeds = calculateNutritionalNeeds(bmr);
 
   return (
     <View style={styles.card}>
       <Text style={styles.name}>{name}</Text>
-      <Text style={styles.username}>username</Text>
-      <Text style={styles.email}>Email@123mail</Text>
+      <Text style={styles.username}>{username}</Text>
+      <Text style={styles.email}>{email}</Text>
 
       <View style={styles.infoSection}>
         <View style={styles.infoItem}>
@@ -66,11 +70,6 @@ const DetailedUserCard: React.FC<DetailedUserCardProps> = ({ name, height, weigh
           <Text style={styles.nutrientLabel}>Karbohidrat</Text>
         </View>
       </View>
-
-      <TouchableOpacity style={styles.editButton}>
-        <FontAwesome6 name="edit" size={20} color="white" />
-        <Text style={styles.editButtonText}>Edit Profile</Text>
-      </TouchableOpacity>
     </View>
   );
 };
@@ -84,7 +83,7 @@ const styles = StyleSheet.create({
     borderColor: "#18B2A0",
     alignItems: "center",
     marginBottom: 20,
-    width: '100%'
+    width: '110%'
   },
   name: {
     fontSize: 24,

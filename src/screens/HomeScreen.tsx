@@ -132,15 +132,15 @@ const HomeScreen: React.FC = () => {
           <View style={styles.cardContainer}>
             <ProgramCard completed={0} total={10} />
             <ProgramCard completed={5} total={10} />
-            <ProgramCard completed={3} total={10} />
-            <ProgramCard completed={8} total={10} />
+            {/* <ProgramCard completed={3} total={10} />
+            <ProgramCard completed={8} total={10} /> */}
           </View>
 
-          {!hasPreTest && (
+          {/* {!hasPreTest && (
             <View style={styles.overlay}>
               <Text style={styles.overlayText}>Anda belum melakukan pre-test</Text>
             </View>
-          )}
+          )} */}
         </View>
 
         <TouchableOpacity onPress={handlePreTestPress} style={styles.ctaButton}>

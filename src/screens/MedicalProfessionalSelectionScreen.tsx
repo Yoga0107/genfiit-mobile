@@ -6,6 +6,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import ResponsiveContainer from '../components/ResponsiveContainer';
 import ButtonComponent from '../components/ButtonComponent';
 import { fetchMedicalProfessionals } from '../api/MedicalProfessional';
+import TelehealthAlert from '../components/Alerts/TelehealthAlert';
 
 type MedicalProfessionalSelectionScreenProps = {
   selectedProgram: string;
@@ -20,8 +21,8 @@ const MedicalProfessionalSelectionScreen: React.FC = () => {
   const [selectedProfessional, setSelectedProfessional] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [showAlert, setShowAlert] = useState<boolean>(false);
 
-  
   useEffect(() => {
     const loadProfessionals = async () => {
       setLoading(true);
@@ -51,10 +52,14 @@ const MedicalProfessionalSelectionScreen: React.FC = () => {
     if (selectedProfessional) {
       console.log(`Navigating to consultation with: ${selectedProfessional}`);
       
+      navigation.navigate('Home');
+      
+      alert('Data konsultasi berhasil ditambahkan, mohon cek halaman notifikasi untuk melihat konsultasi Anda.');
     } else {
       alert('Please select a professional before continuing.');
     }
   };
+  
 
   if (loading) {
     return (
@@ -79,6 +84,12 @@ const MedicalProfessionalSelectionScreen: React.FC = () => {
 
   return (
     <ResponsiveContainer>
+      {showAlert && (
+        <TelehealthAlert
+          message="Please select a professional before continuing."
+          onClose={() => setShowAlert(false)}
+        />
+      )}
       <ScrollView contentContainerStyle={styles.scrollView}>
         <Text style={styles.title}>Pilih Konsultan</Text>
         <Text style={styles.subtitle}>Pilih tenaga kesehatan yang kamu ingin hubungi</Text>

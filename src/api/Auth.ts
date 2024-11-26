@@ -3,7 +3,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import ApiManager from "./ApiManager";
 import axios from "axios";
 
-
 export const LoginApi = async (input: { identifier: string, password: string }) => {
     try {
         const response = await ApiManager.post('/auth/local', {
@@ -61,10 +60,16 @@ export const UserDetailApi = async (userDetails: any, token: string, userId: str
                     height: userDetails.height,
                     weight: userDetails.weight,
                     age: userDetails.age,
-                    dob: userDetails.dob,
+                    dob: userDetails.dob,  
                     gender: userDetails.gender,
                 },
-                users_permissions_user: userId,
+                users_permissions_user: {
+                    data: {
+                        id: userId,
+                        username: userDetails.username, 
+                        email: userDetails.email,       
+                    }
+                },
             },
         }, {
             headers: {

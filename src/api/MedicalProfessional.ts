@@ -14,7 +14,7 @@ export const fetchMedicalProfessionals = async () => {
       }
     });
 
-    return response.data.data; // returns the array of consultants
+    return response.data.data;
   } catch (error) {
     console.error("Failed to fetch medical professionals:", error);
     throw error;

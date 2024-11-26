@@ -37,7 +37,7 @@ const UserCard: React.FC<UserCardProps> = ({ name, height, weight, status }) => 
 
 const styles = StyleSheet.create({
   card: {
-    width: '98%', 
+    width: '110%', 
     maxWidth: 450, 
     paddingHorizontal: 20,
     paddingTop: 20,
@@ -49,7 +49,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.16,
     shadowRadius: 12,
     elevation: 5,
-    marginBottom: 20,
     alignSelf: 'center', 
     borderWidth: 2,
     borderColor: '#18b2a0',

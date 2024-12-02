@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import axios from 'axios';
 import InputComponent from "../components/InputComponent"; 
-import ButtonComponent from "../components/ButtonComponent";
+import ButtonComponent from "../components/Button/ButtonComponent";
 import ResponsiveContainer from "../components/ResponsiveContainer";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import SuccessAlert from "../components/Alerts/SuccessAlert"; // Importing the SuccessAlert

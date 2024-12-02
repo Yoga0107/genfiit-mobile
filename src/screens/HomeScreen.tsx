@@ -9,17 +9,17 @@ import {
   Image,
   ScrollView,
 } from "react-native";
-import ProgramCard from "../components/ProgramCard";
-import ResponsiveContainer from "../components/ResponsiveContainer";
-import { getToken } from "../utils/handlingDataLogin";
-import { calculateBMI, getNutritionalStatus } from "../helper/bmiHelper";
+import { useNavigation, NavigationProp } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useNavigation, NavigationProp } from "@react-navigation/native";
-import { getUserDetails } from "../api/User";
-import UserCard from "../components/UserCard";
-import BMICalculator from "./BMICalculatorScreen";
 
+import ResponsiveContainer from "../components/ResponsiveContainer";
+import UserCard from "../components/UserCard";
+import WeightBox from "../components/BoxComponents/WeightBox";
+
+import { getToken } from "../utils/handlingDataLogin";
+import { calculateBMI, getNutritionalStatus } from "../helper/bmiHelper";
+import { getUserDetails } from "../api/User";
 
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<any>>();
@@ -27,7 +27,6 @@ const HomeScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<string>("");
   const [error, setError] = useState(false);
-  const [hasPreTest, setHasPreTest] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -44,6 +43,7 @@ const HomeScreen: React.FC = () => {
             name: userDetails.full_name,
             height: userDetails.height,
             weight: userDetails.weight,
+            bmi,
             status: nutritionalStatus,
           });
         } else {
@@ -60,21 +60,8 @@ const HomeScreen: React.FC = () => {
     fetchUserData();
   }, []);
 
-  if (loading) {
-    return <ActivityIndicator size="large" color="#00b4ac" />;
-  }
-
-
-  const handleTelehealthPress = () => {
-    navigation.navigate("Telehealth");
-  };
-
-  const handleNotifPress = () => {
-    navigation.navigate("NotificationScreen");
-  };
-
-  const handlePreTestPress = () => {
-    console.log("Pre-Test button pressed");
+  const navigateTo = (screen: string) => {
+    navigation.navigate(screen);
   };
 
   if (loading) {
@@ -92,8 +79,11 @@ const HomeScreen: React.FC = () => {
         <Image source={require("../../assets/logo1.png")} style={styles.logo1} />
         <Image source={require("../../assets/logo2.png")} style={styles.logo2} />
 
-        <TouchableOpacity onPress={handleNotifPress} style={styles.notificationButton}>
-          <MaterialCommunityIcons name="bell" size={24} color="#FFF" />
+        <TouchableOpacity
+          onPress={() => navigateTo("NotificationScreen")}
+          style={styles.notificationButton}
+        >
+          <MaterialCommunityIcons name="bell" size={24} color="#FFC30E" />
         </TouchableOpacity>
 
         <View style={styles.centerContainer}>
@@ -111,7 +101,10 @@ const HomeScreen: React.FC = () => {
           )}
         </View>
 
-        <TouchableOpacity style={styles.telehealthContainer} onPress={handleTelehealthPress}>
+        <TouchableOpacity
+          style={styles.telehealthContainer}
+          onPress={() => navigateTo("Telehealth")}
+        >
           <View style={styles.iconTextContainer}>
             <MaterialCommunityIcons
               name="stethoscope"
@@ -128,23 +121,23 @@ const HomeScreen: React.FC = () => {
           </View>
         </TouchableOpacity>
 
-        <View style={styles.programContainer}>
-          <View style={styles.cardContainer}>
-            <ProgramCard completed={0} total={10} />
-            <ProgramCard completed={5} total={10} />
-            {/* <ProgramCard completed={3} total={10} />
-            <ProgramCard completed={8} total={10} /> */}
-          </View>
+        {userData && (
+  <WeightBox
+    initialWeight={userData.weight}
+    height={userData.height}
+  />
+)}
 
-          {/* {!hasPreTest && (
-            <View style={styles.overlay}>
-              <Text style={styles.overlayText}>Anda belum melakukan pre-test</Text>
-            </View>
-          )} */}
-        </View>
-
-        <TouchableOpacity onPress={handlePreTestPress} style={styles.ctaButton}>
-          <LinearGradient colors={["#4EAA9F", "#CAA638"]} start={[0, 0]} end={[1, 1]} style={styles.gradient}>
+        <TouchableOpacity
+          onPress={() => navigateTo("Pretest")}
+          style={styles.ctaButton}
+        >
+          <LinearGradient
+            colors={["#4EAA9F", "#CAA638"]}
+            start={[0, 0]}
+            end={[1, 1]}
+            style={styles.gradient}
+          >
             <Text style={styles.ctaTitle}>Pre-Test</Text>
             <Text style={styles.ctaSubtitle}>Ambil Pre-Test Sekarang!</Text>
           </LinearGradient>
@@ -170,7 +163,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-
   notificationButton: {
     position: "absolute",
     top: 25,
@@ -178,18 +170,12 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 20,
   },
-  errorText: {
-    fontSize: 20,
-    color: "red",
-    fontWeight: "bold",
-  },
   telehealthContainer: {
     borderColor: "#00b4ac",
     borderWidth: 2,
     borderRadius: 15,
     paddingVertical: 15,
     paddingHorizontal: 30,
-    width: "auto",
     backgroundColor: "#ffffff",
     marginBottom: 20,
     shadowColor: "#000",
@@ -225,48 +211,16 @@ const styles = StyleSheet.create({
     textAlign: "left",
     width: "80%",
   },
-  programContainer: {
-    width: "100%",
-    marginTop: 20,
-  },
-  cardContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    flexWrap: "wrap",
-    paddingHorizontal: 16,
-  },
-  overlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1,
-    borderRadius: 10,
-  },
-  overlayText: {
-    fontSize: 18,
-    color: "#009688",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
   ctaButton: {
-    marginTop: 30,
     alignSelf: "center",
     width: "100%",
     paddingHorizontal: 16,
   },
   gradient: {
     borderRadius: 15,
-    paddingVertical: 15,
+    paddingVertical: 20,
     paddingHorizontal: 20,
     alignItems: "center",
-    marginLeft: 10,
-    marginRight: 10,
-    marginBottom: 25,
   },
   ctaTitle: {
     fontSize: 26,
@@ -280,13 +234,13 @@ const styles = StyleSheet.create({
   },
   imageBackground: {
     width: "100%",
-    height: 300, 
+    height: 300,
     justifyContent: "center",
     alignItems: "center",
     marginTop: -50,
   },
   imageStyle: {
-    resizeMode: "cover", 
+    resizeMode: "cover",
   },
   logo1: {
     width: 50,
@@ -303,6 +257,13 @@ const styles = StyleSheet.create({
     position: "absolute",
     marginLeft: 75,
     top: -5,
+  },  
+  errorText: {
+    fontSize: 18,
+    color: "red",
+    fontWeight: "bold",
+    textAlign: "center",
+    marginVertical: 20,
   },
 });
 

@@ -7,22 +7,22 @@ export const getMaterialById = async (materialSlug: string, token: string) => {
       {
         headers: {
           accept: 'application/json',
-          Authorization: `Bearer ${token}`, // Pastikan token digunakan di header
+          Authorization: `Bearer ${token}`, 
         }
       }
     );
 
-    // Cek apakah respons data ada dan apakah field yang dibutuhkan ada
+    
     if (response.data && response.data.data) {
       const material = response.data.data;
-      // Menyesuaikan sesuai dengan struktur data API yang Anda butuhkan
+      
       const materialContent = material.map((item: any) => ({
-        title: item.attributes.title, // Jika Anda membutuhkan title dari materi
-        content: item.attributes.content, // Jika Anda membutuhkan konten dari materi
+        title: item.attributes.title, 
+        content: item.attributes.content, 
         questions: item.attributes.questions,
       }));
 
-      return materialContent; // Mengembalikan konten materi
+      return materialContent; 
     } else {
       throw new Error('Material tidak ditemukan');
     }

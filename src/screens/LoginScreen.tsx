@@ -1,7 +1,7 @@
   import React, { useContext, useState } from "react";
   import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from "react-native";
   import InputComponent from "../components/InputComponent";
-  import ButtonComponent from "../components/ButtonComponent";
+  import ButtonComponent from "../components/Button/ButtonComponent";
   import ResponsiveContainer from "../components/ResponsiveContainer";
   import { useNavigation, NavigationProp } from "@react-navigation/native";
   import { LoadingContext } from "../context/LoadingContext"; 

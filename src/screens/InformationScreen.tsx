@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, Image } from 'react-native';
-import ButtonComponent from '../components/ButtonComponent';
+import ButtonComponent from '../components/Button/ButtonComponent';
 import ResponsiveContainer from '../components/ResponsiveContainer'; 
 import { getToken } from '../utils/handlingDataLogin'; // Import getToken
 import { useNavigation, CommonActions } from '@react-navigation/native';

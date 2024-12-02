@@ -104,23 +104,26 @@ const NotificationScreen: React.FC = () => {
             Alert.alert("Error", "Tidak dapat membuka WhatsApp")
         );
     };
-
-    const renderNotification = ({ item }: { item: Notification }) => (
-        <NotificationBox
-            name={item.name}
-            category={item.category}
-            createdAt={new Date(item.createdAt).toLocaleString("id-ID", {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-                hour: "numeric",
-                minute: "numeric",
-            })}
-            status={item.status}
-            onChatPress={() => openWhatsApp(item.name, item.category)}
-        />
-    );
+    const renderNotification = ({ item }: { item: Notification }) => {
+        console.log(item.category); // Debug: Periksa nilai category
+        return (
+            <NotificationBox
+                name={item.name}
+                category={item.category}
+                createdAt={new Date(item.createdAt).toLocaleString("id-ID", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                    hour: "numeric",
+                    minute: "numeric",
+                })}
+                status={item.status}
+                onChatPress={() => openWhatsApp(item.name, item.category)}
+            />
+        );
+    };
+    
 
     return (
         <ResponsiveContainer>
@@ -179,11 +182,14 @@ const NotificationBox: React.FC<NotificationBoxProps> = ({
             </Text>
         </View>
         <Text style={styles.subtitle}>
-            <MaterialIcons name="category" size={16} color="#555" />{" "}
-            {category === "gizi"
-                ? "KONSULTASI GIZI"
-                : "KONSULTASI MENTAL HEALTH"}
-        </Text>
+    <MaterialIcons name="category" size={16} color="#555" />{" "}
+    {category === "gizi"
+        ? "KONSULTASI GIZI"
+        : category === "mental_health"
+        ? "KONSULTASI MENTAL HEALTH"
+        : "Kategori Tidak Dikenal"}
+</Text>
+
         <TouchableOpacity
             style={[
                 styles.chatButton,

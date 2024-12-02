@@ -2,13 +2,16 @@ import ApiManager from './ApiManager';
 import { getToken } from "../utils/handlingDataLogin";
 import { getID } from '../utils/handlingDataRegister';
 
-export const postTelehealthData = async (data: any) => {
+export const postTelehealthData = async (data: any, selectedProgram: string) => {
     const token = await getToken();
     const userId = await getID(); 
   
     if (!token || !userId) {
       throw new Error("Token or User ID is missing");
     }
+
+    // Dynamically set the category based on the selected program
+    const category = selectedProgram === 'Mental Health' ? 'mental_health' : 'gizi';
   
     try {
       const response = await ApiManager.post(
@@ -17,7 +20,7 @@ export const postTelehealthData = async (data: any) => {
           data: {
             ...data, 
             users_permissions_user: userId, 
-            category: "gizi", 
+            category: category,  // Set dynamic category
             status: "in_progress", 
           },
         },
@@ -40,5 +43,4 @@ export const postTelehealthData = async (data: any) => {
       console.error("Failed to post telehealth data:", error?.response?.data || error.message);
       throw error;
     }
-  };
-  
+};

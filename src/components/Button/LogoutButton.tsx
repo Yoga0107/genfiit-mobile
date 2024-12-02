@@ -1,8 +1,8 @@
 import React from 'react';
 import { Button, Alert } from 'react-native';
-import { deleteToken } from '../utils/handlingDataLogin'; 
-import { deleteID } from '../utils/handlingDataRegister';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { deleteToken } from '../../utils/handlingDataLogin';
+import { deleteID } from '../../utils/handlingDataRegister';
 
 const LogoutButton: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
   const handleLogout = async () => {

@@ -1,80 +1,111 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, Dimensions, ScrollView, Modal, TouchableOpacity } from "react-native";
-import HeaderComponent from "../components/Header";  
-import InputComponent from "../components/InputComponent";  
-import CustomButton from "../components/CustomButton";  
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, Dimensions, ScrollView, Modal, FlatList } from "react-native";
+import HeaderComponent from "../components/Header";
+import InputComponent from "../components/InputComponent";
+import CustomButton from "../components/Button/CustomButton";
 import { Picker } from "@react-native-picker/picker";
-import { FontAwesome } from '@expo/vector-icons'; // Import FontAwesome for the icon
-
-type BMIData = {
-  "-3SD": number;
-  "-2SD": number;
-  "-1SD": number;
-  median: number;
-  "+1SD": number;
-  "+2SD": number;
-  "+3SD": number;
-};
-
-type ReferenceBMIData = {
-  boys: Record<number, BMIData>;
-  girls: Record<number, BMIData>;
-};
-
-const referenceBMIData: ReferenceBMIData = {
-  boys: {
-    14: { "-3SD": 15.7, "-2SD": 16.9, "-1SD": 18.1, median: 19.5, "+1SD": 21.1, "+2SD": 22.9, "+3SD": 24.8 },
-    15: { "-3SD": 16.0, "-2SD": 17.3, "-1SD": 18.5, median: 19.9, "+1SD": 21.5, "+2SD": 23.4, "+3SD": 25.4 },
-    16: { "-3SD": 16.3, "-2SD": 17.6, "-1SD": 18.9, median: 20.3, "+1SD": 22.0, "+2SD": 24.0, "+3SD": 26.0 },
-    17: { "-3SD": 16.5, "-2SD": 17.8, "-1SD": 19.2, median: 20.7, "+1SD": 22.4, "+2SD": 24.4, "+3SD": 26.5 },
-    18: { "-3SD": 16.7, "-2SD": 18.0, "-1SD": 19.4, median: 21.0, "+1SD": 22.7, "+2SD": 24.8, "+3SD": 26.9 },
-  },
-  girls: {
-    14: { "-3SD": 15.5, "-2SD": 16.7, "-1SD": 17.9, median: 19.2, "+1SD": 20.7, "+2SD": 22.4, "+3SD": 24.2 },
-    15: { "-3SD": 15.6, "-2SD": 16.8, "-1SD": 18.0, median: 19.4, "+1SD": 20.9, "+2SD": 22.6, "+3SD": 24.5 },
-    16: { "-3SD": 15.7, "-2SD": 17.0, "-1SD": 18.2, median: 19.7, "+1SD": 21.2, "+2SD": 23.0, "+3SD": 24.9 },
-    17: { "-3SD": 15.8, "-2SD": 17.1, "-1SD": 18.4, median: 19.9, "+1SD": 21.5, "+2SD": 23.3, "+3SD": 25.3 },
-    18: { "-3SD": 15.9, "-2SD": 17.2, "-1SD": 18.5, median: 20.1, "+1SD": 21.7, "+2SD": 23.6, "+3SD": 25.6 },
-  },
-};
+import { FontAwesome } from '@expo/vector-icons';
+import { calculateBMI, getBMICategory } from "../helper/calculateBmiHelper";
+import { getBmiHistory, postBMIHistory } from "../api/bmiHistory";
+import { getID } from "../utils/handlingDataRegister";
+import { getToken } from "../utils/handlingDataLogin";
 
 const { width } = Dimensions.get("window");
 
-const BMICalculator: React.FC = () => {
+const BMICalculatorScreen: React.FC = () => {
   const [age, setAge] = useState<number>(0);
   const [gender, setGender] = useState<string>("boys");
   const [weight, setWeight] = useState<number>(0);
   const [heightInput, setHeight] = useState<number>(0);
   const [bmi, setBmi] = useState<number | null>(null);
   const [bmiCategory, setBmiCategory] = useState<string>("");
-  const [modalVisible, setModalVisible] = useState(false); // Modal visibility state
+  const [modalVisible, setModalVisible] = useState(false);
+  const [history, setHistory] = useState<any[]>([]);
+  const [userId, setUserId] = useState<number | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
-  const calculateBMI = () => {
-    if (heightInput === 0 || weight === 0 || age === 0 || !referenceBMIData[gender as keyof ReferenceBMIData]) return;
+  useEffect(() => {
+    const loadUserData = async () => {
+      const storedUserId: any = await getID();
+      const storedToken: any = await getToken();
+      setUserId(storedUserId);
+      setToken(storedToken);
+    };
 
-    const heightInMeters = heightInput / 100;
-    const calculatedBMI = weight / (heightInMeters * heightInMeters);
-    setBmi(calculatedBMI);
+    loadUserData();
+  }, []);
 
-    const genderData = referenceBMIData[gender as keyof ReferenceBMIData];
-    const ageData = genderData[age];
+  const fetchBMIHistory = async () => {
+    if (userId && token) {
+      try {
+        const data = await getBmiHistory(userId, token);
+        setHistory(data.data);
+      } catch (error) {
+        console.error("Failed to fetch BMI history:", error);
+      }
+    }
+  };
 
-    if (!ageData) {
-      setBmiCategory("Age data not available");
+  useEffect(() => {
+    if (userId && token) {
+      fetchBMIHistory();
+    }
+  }, [userId, token]);
+
+  const handleCalculateBMI = async () => {
+    if (heightInput === 0 || weight === 0 || age === 0) {
+      console.log("Please ensure all inputs are provided.");
       return;
     }
-
-    let category = "";
-    if (calculatedBMI < ageData["-3SD"]) category = "Severely underweight";
-    else if (calculatedBMI >= ageData["-3SD"] && calculatedBMI < ageData["-2SD"]) category = "Moderately underweight";
-    else if (calculatedBMI >= ageData["-2SD"] && calculatedBMI < ageData["-1SD"]) category = "Mildly underweight";
-    else if (calculatedBMI >= ageData["-1SD"] && calculatedBMI <= ageData["+1SD"]) category = "Normal weight";
-    else if (calculatedBMI > ageData["+1SD"] && calculatedBMI <= ageData["+2SD"]) category = "Overweight";
-    else if (calculatedBMI > ageData["+2SD"]) category = "Obese";
-
+  
+    if (age < 1 || age > 99) {
+      console.log("Age must be between 1 and 99.");
+      setBmiCategory("Age not available");
+      return;
+    }
+  
+    const calculatedBMI = calculateBMI(weight, heightInput);
+    setBmi(calculatedBMI);
+  
+    const category = getBMICategory(calculatedBMI, age, gender as "boys" | "girls");
     setBmiCategory(category);
-    setModalVisible(true); // Show the modal when calculation is done
+    setModalVisible(true);
+  
+    try {
+      await postBMIHistory(
+        age,
+        gender === "boys" ? "male" : "female",
+        heightInput,
+        weight,
+        calculatedBMI.toFixed(2)
+      );
+      fetchBMIHistory();
+    } catch (error) {
+      console.error("Failed to post BMI history:", error);
+    }
   };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    // Reset values when closing the modal
+    setAge(0);
+    setGender("boys");
+    setWeight(0);
+    setHeight(0);
+    setBmi(null);
+    setBmiCategory("");
+  };
+
+  const renderHistoryItem = ({ item }: { item: any }) => (
+    <View style={styles.historyItem}>
+      <Text style={styles.historyText}>Age: {item.attributes.age}</Text>
+      <Text style={styles.historyText}>Gender: {item.attributes.gender === "male" ? "Male" : "Female"}</Text>
+      <Text style={styles.historyText}>Height: {item.attributes.height} cm</Text>
+      <Text style={styles.historyText}>Weight: {item.attributes.weight} kg</Text>
+      <Text style={styles.historyText}>BMI: {item.attributes.result}</Text>
+      <Text style={styles.historyText}>Created At: {new Date(item.attributes.createdAt).toLocaleString()}</Text>
+    </View>
+  );
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -82,9 +113,12 @@ const BMICalculator: React.FC = () => {
 
       <View style={styles.inputContainer}>
         <InputComponent
-          placeholder="Age (14-18)"
+          placeholder="Umur"
           value={age ? age.toString() : ""}
-          onChangeText={(text) => setAge(Number(text))}
+          onChangeText={(text) => {
+            const newAge = Number(text);
+            setAge(isNaN(newAge) ? 0 : newAge);
+          }}
           keyboardType="numeric"
         />
 
@@ -101,25 +135,30 @@ const BMICalculator: React.FC = () => {
         </View>
 
         <InputComponent
-          placeholder="Weight (kg)"
+          placeholder="Berat Badan (kg)"
           value={weight ? weight.toString() : ""}
-          onChangeText={(text) => setWeight(Number(text))}
+          onChangeText={(text) => {
+            const newWeight = Number(text);
+            setWeight(isNaN(newWeight) ? 0 : newWeight);
+          }}
           keyboardType="numeric"
         />
 
         <InputComponent
-          placeholder="Height (cm)"
+          placeholder="Tinggi Badan (cm)"
           value={heightInput ? heightInput.toString() : ""}
-          onChangeText={(text) => setHeight(Number(text))}
+          onChangeText={(text) => {
+            const newHeight = Number(text);
+            setHeight(isNaN(newHeight) ? 0 : newHeight);
+          }}
           keyboardType="numeric"
         />
       </View>
 
       <View>
-        <CustomButton title="Calculate BMI" onPress={calculateBMI} />
+        <CustomButton title="Calculate BMI" onPress={handleCalculateBMI} />
       </View>
 
-      {/* Modal for displaying results */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -131,10 +170,20 @@ const BMICalculator: React.FC = () => {
             <FontAwesome name="check-circle" size={30} color="#0FA18C" />
             <Text style={styles.resultText}>Your BMI: {bmi?.toFixed(2)}</Text>
             <Text style={styles.resultText}>BMI Category: {bmiCategory}</Text>
-            <CustomButton title="Close" onPress={() => setModalVisible(false)} />
+            <CustomButton title="Close" onPress={handleCloseModal} />
           </View>
         </View>
       </Modal>
+
+      <View style={styles.historyContainer}>
+        <Text style={styles.historyTitle}>BMI History</Text>
+        <FlatList
+          data={history}
+          renderItem={renderHistoryItem}
+          keyExtractor={(item) => item.id.toString()}
+          style={styles.historyList}
+        />
+      </View>
     </ScrollView>
   );
 };
@@ -151,20 +200,11 @@ const styles = StyleSheet.create({
     width: "90%",
     marginBottom: 20,
   },
-  result: {
-    marginTop: 20,
-    alignItems: "center",
-  },
-  resultText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginVertical: 5,
-  },
   pickerContainer: {
     borderWidth: 1,
     borderColor: '#0FA18C',
     borderRadius: 50,
-    marginBottom: 20
+    marginBottom: 20,
   },
   picker: {
     width: '100%',
@@ -183,6 +223,32 @@ const styles = StyleSheet.create({
     width: width - 60,
     alignItems: "center",
   },
+  historyContainer: {
+    marginTop: 20,
+    width: "90%",
+  },
+  historyTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  historyList: {
+    width: "100%",
+  },
+  historyItem: {
+    backgroundColor: "#e9ecef",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  historyText: {
+    fontSize: 14,
+  },
+  resultText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginVertical: 5,
+  },
 });
 
-export default BMICalculator;
+export default BMICalculatorScreen;

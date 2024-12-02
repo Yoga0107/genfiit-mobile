@@ -1,25 +1,28 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
-import { calculateBMR, calculateNutritionalNeeds, NutritionalNeeds } from '../helper/nutritionHelper';
-import { FontAwesome6 } from '@expo/vector-icons';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+
+type NutritionNeeds = {
+  protein: number;
+  fat: number;
+  carbs: number;
+};
 
 type DetailedUserCardProps = {
   name: string;
   height: number;
   weight: number;
-  dob: Date;
+  dob: number;  // DOB dalam format epoch
+  gender: 'male' | 'female';  // Jenis kelamin
   nutritionalStatus: string;
   email: string;
   username: string;
 };
 
-const DetailedUserCard: React.FC<DetailedUserCardProps> = ({ name, height, weight, dob, nutritionalStatus, email, username }) => {
-  const age = new Date().getFullYear() - dob.getFullYear();
-  const ageAdjusted = new Date().getMonth() < dob.getMonth() ? age - 1 : age; 
-
-  const bmr = calculateBMR(weight, height, ageAdjusted);  
-  const nutritionalNeeds: NutritionalNeeds = calculateNutritionalNeeds(bmr);
+const DetailedUserCard: React.FC<DetailedUserCardProps> = ({ name, height, weight, dob, gender, nutritionalStatus, email, username }) => {
+  const age = calculateAge(dob);
+  const bbi = calculateBBI(height, gender);
+  const bmr = calculateBMR(weight, height, age, gender);  
+  const nutritionalNeeds: NutritionNeeds = calculateNutritionNeeds(bmr);
 
   return (
     <View style={styles.card}>
@@ -89,11 +92,13 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "#18B2A0",
+    alignSelf: "flex-start",
   },
   username: {
     fontSize: 16,
     color: "#6A6A71",
     marginVertical: 2,
+    alignSelf: "flex-start",
   },
   email: {
     fontSize: 16,
@@ -102,6 +107,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#D9D9D9",
     paddingBottom: 8,
+    alignSelf: "flex-start",
   },
   infoSection: {
     width: "100%",
@@ -162,22 +168,56 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#6A6A71",
   },
-  editButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#18B2A0",
-    paddingVertical: 10,
-    width: "195%",
-    justifyContent: "center",
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-  },
-  editButtonText: {
-    flexDirection: "row",
-    color: "#FFF",
-    fontSize: 16,
-    marginLeft: 8
-  },
 });
+
+// Fungsi untuk menghitung umur dari DOB dalam format epoch
+function calculateAge(dob: number): number {
+  const currentDate = new Date();
+  const birthDate = new Date(dob * 1000);  // Mengonversi epoch ke milidetik
+  const age = currentDate.getFullYear() - birthDate.getFullYear();
+  const month = currentDate.getMonth() - birthDate.getMonth();
+
+  if (month < 0 || (month === 0 && currentDate.getDate() < birthDate.getDate())) {
+    return age - 1;
+  }
+
+  return age;
+}
+
+// Fungsi untuk menghitung BBI (Berat Badan Ideal)
+function calculateBBI(height: number, gender: 'male' | 'female'): number {
+  if (gender === 'male') {
+    return height - 100;
+  } else {
+    return height - 104;
+  }
+}
+
+// Fungsi untuk menghitung BMR menggunakan rumus Harris-Benedict
+function calculateBMR(weight: number, height: number, age: number, gender: 'male' | 'female'): number {
+  let bmr: number;
+  if (gender === 'male') {
+    // Rumus untuk pria
+    bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+  } else {
+    // Rumus untuk wanita
+    bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+  }
+
+  return parseFloat(bmr.toFixed(1));  // Membulatkan BMR sampai 1 angka desimal
+}
+
+
+// Fungsi untuk menghitung kebutuhan nutrisi berdasarkan BMR
+function calculateNutritionNeeds(bmr: number): NutritionNeeds {
+  const protein = parseFloat((bmr * 0.15 / 4).toFixed(1));  // Membulatkan protein ke 1 angka desimal
+  const fat = parseFloat((bmr * 0.30 / 9).toFixed(1));     // Membulatkan lemak ke 1 angka desimal
+  const carbs = parseFloat((bmr * 0.55 / 4).toFixed(1));   // Membulatkan karbohidrat ke 1 angka desimal
+  return { 
+    protein, 
+    fat, 
+    carbs 
+  };
+}
 
 export default DetailedUserCard;

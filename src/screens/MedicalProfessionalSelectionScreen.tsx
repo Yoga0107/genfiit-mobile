@@ -4,7 +4,7 @@ import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { NavigationProp } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import ResponsiveContainer from '../components/ResponsiveContainer';
-import ButtonComponent from '../components/ButtonComponent';
+import ButtonComponent from '../components/Button/ButtonComponent';
 import { fetchMedicalProfessionals } from '../api/MedicalProfessional';
 import TelehealthAlert from '../components/Alerts/TelehealthAlert';
 

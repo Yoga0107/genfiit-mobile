@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image, Linking } from "react-native";
 import Checkbox from "expo-checkbox";
 import InputComponent from "../components/InputComponent"; 
-import ButtonComponent from "../components/ButtonComponent";
+import ButtonComponent from "../components/Button/ButtonComponent";
 import ResponsiveContainer from "../components/ResponsiveContainer";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import AlertModal from '../components/AlertModal';

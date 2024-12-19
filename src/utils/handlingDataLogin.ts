@@ -15,9 +15,8 @@ const saveToken = async (value: string) => {
 const deleteToken = async () => {
   try {
     await AsyncStorage.removeItem('token');
-    console.log("Token Has Been Deleted")
-  } catch (e) {
-    alert(`Remove data failed: ${e}`);
+  } catch (error) {
+    console.error('Failed to delete token:', error);
   }
 };
 
@@ -31,8 +30,38 @@ const getToken = async () => {
   }
 };
 
+export const saveCompletionStatus = async (status: boolean) => {
+  try {
+    await AsyncStorage.setItem('@completion_status', JSON.stringify(status));
+  } catch (error) {
+    console.error('Error saving completion status', error);
+  }
+};
+
+// Fungsi untuk mendapatkan completion status
+export const getCompletionStatus = async () => {
+  try {
+    const status = await AsyncStorage.getItem('@completion_status');
+    return status ? JSON.parse(status) : false; // Mengembalikan false jika tidak ada status
+  } catch (error) {
+    console.error('Error getting completion status', error);
+    return false; // Mengembalikan false jika terjadi error
+  }
+};
+
+// Delete Completion Status (is_complete)
+
+export const deleteCompletionStatus = async () => {
+  try {
+    await AsyncStorage.removeItem('completionStatus');  // Ganti dengan kunci yang digunakan untuk menyimpan status completion
+  } catch (error) {
+    console.error('Failed to delete completion status:', error);
+  }
+};
+
+
 export {
   saveToken,
   deleteToken,
-  getToken
+  getToken,
 };

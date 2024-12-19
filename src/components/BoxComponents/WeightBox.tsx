@@ -1,27 +1,55 @@
+// components/BoxComponents/WeightBox.tsx
+
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { calculateBMI } from "../../helper/calculateBmiHelper";
 
 type WeightBoxProps = {
-  initialWeight: number; // Berat user
+  initialWeight: number; // Berat user dalam kg
   height: number; // Tinggi badan user dalam cm
+  gender: string; // Gender user (male/female)
 };
 
-const WeightBox: React.FC<WeightBoxProps> = ({ initialWeight, height }) => {
-  const bmi = calculateBMI(initialWeight, height);
-
-  const getBMIStatus = (bmi: number) => {
-    if (bmi < 18.5) return { status: "Kurang Gizi", color: "#FFC107" };
-    if (bmi >= 18.5 && bmi < 24.9) return { status: "Normal", color: "#18B2A0" };
-    if (bmi >= 25) return { status: "Obesitas", color: "#FF5722" };
-    return { status: "Tidak Valid", color: "#6A6A71" };
+const WeightBox: React.FC<WeightBoxProps> = ({ initialWeight, height, gender }) => {
+  // Menghitung IMT
+  const calculateIMT = (weight: number, height: number) => {
+    const heightInMeters = height / 100; // Konversi cm ke meter
+    return weight / (heightInMeters * heightInMeters);
   };
 
-  const { status, color } = getBMIStatus(bmi);
+  // Menghitung Berat Badan Ideal (BBI)
+  const calculateBBI = (height: number, gender: string) => {
+    return gender === "male" ? (height - 100) - (0.1 * (height - 100)) : (height - 100) - (0.15 * (height - 100));
+  };
+
+  // Menentukan status berdasarkan IMT
+  const getIMTStatus = (imt: number) => {
+    let status = "";
+    let color = "";
+
+    if (imt < 18.5) {
+      status = "Underweight";
+      color = "#FFC107"; // Kuning
+    } else if (imt >= 18.5 && imt < 25) {
+      status = "Normal Weight";
+      color = "#18B2A0"; // Hijau
+    } else if (imt >= 25 && imt < 30) {
+      status = "Overweight";
+      color = "#FF5722"; // Oranye
+    } else {
+      status = "Obesity";
+      color = "#F44336"; // Merah
+    }
+
+    return { status, color };
+  };
+
+  const imt = calculateIMT(initialWeight, height);
+  const bbi = calculateBBI(height, gender);
+  const { status, color } = getIMTStatus(imt);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Berat Badan</Text>
+      <Text style={styles.title}>Indeks Massa Tubuh (IMT)</Text>
       <View style={styles.content}>
         <View style={styles.weightContainer}>
           <Text style={styles.weightValue}>{initialWeight} kg</Text>
@@ -29,11 +57,12 @@ const WeightBox: React.FC<WeightBoxProps> = ({ initialWeight, height }) => {
         </View>
         <View style={styles.barContainer}>
           <View style={[styles.bar, { backgroundColor: color }]} />
-          <Text style={[styles.bmiStatus, { color }]}>{status}</Text>
+          <Text style={[styles.imtStatus, { color }]}>{status}</Text>
+          <Text style={styles.imtValue}>IMT: {imt.toFixed(1)}</Text>
         </View>
         <View style={styles.weightContainer}>
-          <Text style={styles.weightValue}>{bmi.toFixed(1)}</Text>
-          <Text style={styles.weightLabel}>BMI</Text>
+          <Text style={styles.weightValue}>{bbi.toFixed(1)} kg</Text>
+          <Text style={styles.weightLabel}>BBI</Text>
         </View>
       </View>
     </View>
@@ -90,9 +119,14 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     marginBottom: 8,
   },
-  bmiStatus: {
+  imtStatus: {
     fontSize: 12,
     fontWeight: "bold",
+  },
+  imtValue: {
+    fontSize: 12,
+    color: "#6A6A71",
+    marginTop: 4,
   },
 });
 

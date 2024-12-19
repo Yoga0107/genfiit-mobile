@@ -9,10 +9,12 @@ import {
   ImageBackground,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import DetailedUserCard from '../components/DetailedUserCard';
-import { deleteToken } from '../utils/handlingDataLogin';
+import { deleteCompletionStatus, deleteToken } from '../utils/handlingDataLogin';
+import { deleteID } from '../utils/handlingDataRegister';  // Import deleteCompletionStatus
 import { calculateBMI, getNutritionalStatus } from '../helper/bmiHelper';
 import ResponsiveContainer from '../components/ResponsiveContainer';
 import { getUserDetails } from '../api/User';
@@ -78,13 +80,40 @@ const ApplicationScreen: React.FC<ApplicationScreenProps> = ({ navigation }) => 
   const handleEditPassword = () => navigation.navigate('ChangePassword');
   const handleBMICalculator = () => navigation.navigate('BMICalculator');
   const handleCertificate = () => navigation.navigate('Certificate');
-  const handleLogout = async () => {
-    try {
-      await deleteToken();
-      navigation.navigate('Login');
-    } catch (error) {
-      console.error('Error during logout:', error);
-    }
+
+  const handleLogout = () => {
+    // Show confirmation dialog before logging out
+    Alert.alert(
+      "Konfirmasi Logout",
+      "Apakah Anda yakin ingin logout?",
+      [
+        {
+          text: "Batal",
+          style: "cancel",
+        },
+        {
+          text: "Ya",
+          onPress: async () => {
+            try {
+              // Delete token, user ID, and completion status from AsyncStorage
+              await deleteToken();
+              await deleteID();
+              await deleteCompletionStatus();  // Add deleteCompletionStatus here
+
+              // Refresh the app state (you can use a reload or reset method)
+              // Navigate the user to the Login screen after logout
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }],
+              });
+            } catch (error) {
+              console.error('Error during logout:', error);
+            }
+          },
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
   if (loading) {

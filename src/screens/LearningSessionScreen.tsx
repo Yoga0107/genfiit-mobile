@@ -57,7 +57,8 @@ const LearningSessionScreen: React.FC = () => {
         updatedAnswers.push({ questionId, answerId, status: true });
       }
 
-      const allAnswered = currentSegment.questions.every((q: any) =>
+      const currentSegment = material?.data[selectedSegment];
+      const allAnswered = currentSegment?.questions.every((q: any) =>
         updatedAnswers.some((a) => a.questionId === q.id && a.status)
       );
       setIsButtonActive(allAnswered);
@@ -140,14 +141,32 @@ const LearningSessionScreen: React.FC = () => {
         <View style={styles.container}>
           <HeaderComponent title="Pilih Kategori Modul" />
           <ScrollView contentContainerStyle={styles.scrollView}>
-            <TouchableOpacity style={styles.card} onPress={() => setSelectedTopic('Mental')}>
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => {
+                setSelectedTopic('Mental');
+                // Resetting all previous data on category selection
+                setMaterial(null);
+                setAnswers([]);
+                setSelectedSegment(0);
+              }}
+            >
               <Image
                 source={require('../../assets/mental-logo.png')}
                 style={[styles.logo, { width: width * 0.6, height: width * 0.6 }]}
               />
               <Text style={styles.cardText}>Mental Health</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.card} onPress={() => setSelectedTopic('Gizi')}>
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => {
+                setSelectedTopic('Gizi');
+                // Resetting all previous data on category selection
+                setMaterial(null);
+                setAnswers([]);
+                setSelectedSegment(0);
+              }}
+            >
               <Image
                 source={require('../../assets/gizi-logo.png')}
                 style={[styles.logo, { width: width * 0.6, height: width * 0.6 }]}
@@ -167,81 +186,81 @@ const LearningSessionScreen: React.FC = () => {
   const segmentTitle = `${segmentTitlePrefix} - Konten ${selectedSegment + 1}`;
 
   return (
-    <ResponsiveContainer>
-      <View style={styles.container}>
-        <HeaderComponent title={segmentTitle} />
-        <ScrollView contentContainerStyle={styles.scrollView}>
-          {/* Conditionally render the image for Mental Health topic content */}
-          {selectedTopic === 'Mental' && selectedSegment === 0 && (
-            <Image
-              source={require('../../assets/mental1.png')}
-              style={styles.moduleImage}
-            />
-          )}
-          {selectedTopic === 'Mental' && selectedSegment === 1 && (
-            <Image
-              source={require('../../assets/mental2.png')}
-              style={styles.moduleImage}
-            />
-          )}
-
-          {/* Conditionally render the image for Gizi topic content */}
-          {selectedTopic === 'Gizi' && selectedSegment === 0 && (
-            <Image
-              source={require('../../assets/gizimodul1.png')}
-              style={styles.moduleImage}
-            />
-          )}
-          {selectedTopic === 'Gizi' && selectedSegment === 1 && (
-            <Image
-              source={require('../../assets/gizimodul2.png')}
-              style={styles.moduleImage}
-            />
-          )}
-
-          <View style={styles.card}>
-            <Text style={[styles.header, styles.textLeft]}>{currentSegment.title || 'Title not available'}</Text>
-            <Text style={[styles.descriptionText, styles.textLeft]}>
-              {getDescriptionText(currentSegment.description) || 'Description not available'}
-            </Text>
-
-            <FlatList
-              data={currentSegment.questions.slice(0, 2)}
-              keyExtractor={(q) => q.id.toString()}
-              renderItem={({ item: question }) => (
-                <View style={styles.questionContainer}>
-                  <Text style={[styles.questionTitle, styles.textLeft]}>{question.title}</Text>
-                  {question.item.map((answer: any) => (
-                    <TouchableOpacity
-                      key={answer.id}
-                      style={[
-                        styles.answerButton,
-                        answers.some((a) => a.questionId === question.id && a.answerId === answer.id) &&
-                          styles.selectedAnswer,
-                      ]}
-                      onPress={() => handleAnswerSelection(question.id, answer.id)}>
-                      <View style={styles.dotContainer}>
-                        <View
-                          style={[
-                            styles.dot,
-                            answers.some((a) => a.questionId === question.id && a.answerId === answer.id) &&
-                              styles.filledDot,
-                          ]}
-                        />
-                        <Text style={styles.answerText}>{answer.title}</Text>
-                      </View>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
-            />
-
-            <ButtonComponent title="Submit Answer" onPress={submitAnswers} disabled={!isButtonActive} />
-          </View>
-        </ScrollView>
-      </View>
-    </ResponsiveContainer>
-  );
+      <ResponsiveContainer>
+        <View style={styles.container}>
+          <HeaderComponent title={segmentTitle} />
+          <ScrollView contentContainerStyle={styles.scrollView}>
+            {/* Conditionally render the image for Gizi topic content */}
+            {selectedTopic === 'Gizi' && selectedSegment === 0 && (
+              <Image
+                source={require('../../assets/gizimodul1.png')}
+                style={styles.moduleImage}
+              />
+            )}
+            {selectedTopic === 'Gizi' && selectedSegment === 1 && (
+              <Image
+                source={require('../../assets/gizimodul2.png')}
+                style={styles.moduleImage}
+              />
+            )}
+    
+            {/* Conditionally render the image for Mental Health topic content */}
+            {selectedTopic === 'Mental' && selectedSegment === 0 && (
+              <Image
+                source={require('../../assets/mental1.png')}
+                style={styles.moduleImage}
+              />
+            )}
+            {selectedTopic === 'Mental' && selectedSegment === 1 && (
+              <Image
+                source={require('../../assets/mental2.png')}
+                style={styles.moduleImage}
+              />
+            )}
+    
+            <View style={styles.card}>
+              <Text style={[styles.header, styles.textLeft]}>{currentSegment.title || 'Title not available'}</Text>
+              <Text style={[styles.descriptionText, styles.textLeft]}>
+                {getDescriptionText(currentSegment.description) || 'Description not available'}
+              </Text>
+    
+              <FlatList
+                data={currentSegment.questions.slice(0, 2)} // Ensures only 2 questions are displayed per segment
+                keyExtractor={(q) => q.id.toString()}
+                renderItem={({ item: question }) => (
+                  <View style={styles.questionContainer}>
+                    <Text style={[styles.questionTitle, styles.textLeft]}>{question.title}</Text>
+                    {question.item.map((answer: any) => (
+                      <TouchableOpacity
+                        key={answer.id}
+                        style={[
+                          styles.answerButton,
+                          answers.some((a) => a.questionId === question.id && a.answerId === answer.id) &&
+                            styles.selectedAnswer,
+                        ]}
+                        onPress={() => handleAnswerSelection(question.id, answer.id)}>
+                        <View style={styles.dotContainer}>
+                          <View
+                            style={[
+                              styles.dot,
+                              answers.some((a) => a.questionId === question.id && a.answerId === answer.id) &&
+                                styles.filledDot,
+                            ]}
+                          />
+                          <Text style={styles.answerText}>{answer.title}</Text>
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              />
+    
+              <ButtonComponent title="Submit Answer" onPress={submitAnswers} disabled={!isButtonActive} />
+            </View>
+          </ScrollView>
+        </View>
+      </ResponsiveContainer>
+    );  
 };
 
 const styles = StyleSheet.create({
@@ -271,66 +290,64 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     resizeMode: 'contain',
   },
+  scrollView: {
+    paddingBottom: 20,
+  },
   cardText: {
     fontSize: 18,
     fontWeight: 'bold',
   },
-  scrollView: {
-    paddingBottom: 20,
-  },
-  header: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
   descriptionText: {
     fontSize: 16,
-    color: '#666',
-    marginBottom: 20,
+    color: '#333',
   },
   questionContainer: {
-    marginBottom: 10,
+    marginBottom: 15,
+    width: width - 40,
   },
   questionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
+    marginBottom: 10,
   },
   answerButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    backgroundColor: '#f4f4f4',
-    marginVertical: 8,
-    borderRadius: 5,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
+    padding: 10,
+    marginVertical: 5,
+    borderRadius: 8,
+    backgroundColor: '#f1f1f1',
+    width: '100%',
   },
-  selectedAnswer: {
-    backgroundColor: '#18B2A0',
+  answerText: {
+    fontSize: 16,
+    color: '#333',
   },
   dotContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   dot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: '#ccc',
     marginRight: 10,
   },
   filledDot: {
     backgroundColor: '#18B2A0',
   },
-  answerText: {
-    fontSize: 16,
-    color: '#333',
+  selectedAnswer: {
+    backgroundColor: '#e0f7f7',
   },
   moduleImage: {
     width: '100%',
     height: 200,
+    marginBottom: 10,
     resizeMode: 'contain',
-    marginVertical: 15,
+  },
+  header: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 10,
   },
 });
 

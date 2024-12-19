@@ -17,7 +17,6 @@ import ForumScreen from '../screens/ForumScreen';
 import LearningSessionScreen from '../screens/LearningSessionScreen';
 import { getToken } from '../utils/handlingDataLogin';
 import TelehealthScreen from '../screens/TelehealthScreen';
-import MedicalProfessionalSelectionScreen from '../screens/MedicalProfessionalSelectionScreen';
 import UserDetailScreen from '../screens/UserDetailScreen';
 import NotificationScreen from '../screens/NotificationScreen';
 import ChangePasswordScreen from '../screens/ChangePasswordScreen';
@@ -83,7 +82,7 @@ const BottomTabNavigation = () => (
     <Tab.Screen
       name="Forum"
       component={ForumScreen}
-      options={{
+      options={{ headerShown: false,
         tabBarIcon: ({ color, focused }) => (
           <Ionicons name="chatbubbles" size={focused ? 36 : 24} color={color} />
         ),
@@ -161,7 +160,6 @@ const AppNavigator: React.FC = () => {
           component={TelehealthScreen}
           options={{ headerShown: false }}
         />
-        <Stack.Screen name="MedicalProfessionalSelectionScreen" component={MedicalProfessionalSelectionScreen} options={{ headerShown: false }} />
         <Stack.Screen name="NotificationScreen" component={NotificationScreen} options={{ headerShown: false }} />
         <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Certificate" component={CertificateScreen} options={{ headerShown: false }} />

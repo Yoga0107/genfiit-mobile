@@ -27,6 +27,9 @@
         "projectId": "a4d4711d-e10a-49e5-a61b-90d624e3cbef"
       },
       "apiUrl": "https://api-production.example.com"
-    }
+    },
+    "plugins": [
+      "expo-asset"
+    ]
   }
 }

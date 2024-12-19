@@ -17,14 +17,29 @@ const LogoutButton: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
         {
           text: "Logout",
           onPress: async () => {
-            // Clear all AsyncStorage data
-            await AsyncStorage.clear();
-            
-            // Optionally call deleteToken and deleteID in case there are specific items to remove
-            await deleteToken(); 
-            await deleteID(); 
+            try {
+              // Log the current user ID before deletion
+              const userId = await AsyncStorage.getItem('userId');
+              console.log('User ID before logout:', userId);
 
-            onLogout(); // Call the onLogout prop to handle state update or navigation
+              // Delete user ID
+              await deleteID();
+
+              // Ensure 'userId' is deleted
+              const deletedUserId = await AsyncStorage.getItem('userId');
+              console.log('User ID after deletion:', deletedUserId); // Should be null
+
+              // Clear all AsyncStorage data
+              await AsyncStorage.clear();
+
+              // Optionally delete the token
+              await deleteToken();
+
+              // Trigger the onLogout prop to handle state update or navigation
+              onLogout();
+            } catch (error) {
+              console.error('Error during logout process:', error);
+            }
           }
         }
       ]

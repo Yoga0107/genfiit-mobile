@@ -43,6 +43,7 @@ const HomeScreen: React.FC = () => {
             name: userDetails.full_name,
             height: userDetails.height,
             weight: userDetails.weight,
+            gender: userDetails.gender, // Assuming gender is available here
             bmi,
             status: nutritionalStatus,
           });
@@ -122,11 +123,12 @@ const HomeScreen: React.FC = () => {
         </TouchableOpacity>
 
         {userData && (
-  <WeightBox
-    initialWeight={userData.weight}
-    height={userData.height}
-  />
-)}
+          <WeightBox
+            initialWeight={userData.weight}
+            height={userData.height}
+            gender={userData.gender}  // Now passing gender here
+          />
+        )}
 
         <TouchableOpacity
           onPress={() => navigateTo("Pretest")}
@@ -138,8 +140,8 @@ const HomeScreen: React.FC = () => {
             end={[1, 1]}
             style={styles.gradient}
           >
-            <Text style={styles.ctaTitle}>Pre-Test</Text>
-            <Text style={styles.ctaSubtitle}>Ambil Pre-Test Sekarang!</Text>
+            <Text style={styles.ctaTitle}>Post-Test</Text>
+            <Text style={styles.ctaSubtitle}>Ambil Post-Test mu Sekarang!</Text>
           </LinearGradient>
         </TouchableOpacity>
       </ScrollView>
@@ -257,7 +259,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     marginLeft: 75,
     top: -5,
-  },  
+  },
   errorText: {
     fontSize: 18,
     color: "red",

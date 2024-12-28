@@ -1,32 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Alert, Image, ActivityIndicator } from 'react-native';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import InputComponent from '../components/InputComponent';
-import ButtonComponent from '../components/Button/ButtonComponent';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker';
-import ResponsiveContainer from '../components/ResponsiveContainer';
-import HeaderComponent from '../components/Header';
-import { fetchMedicalProfessionals } from '../api/MedicalProfessional';
-import { postTelehealthData } from '../api/Telehealth';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Dimensions,
+  Alert,
+  Image,
+  ActivityIndicator,
+} from "react-native";
+import { useNavigation, NavigationProp } from "@react-navigation/native";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import InputComponent from "../components/InputComponent";
+import ButtonComponent from "../components/Button/ButtonComponent";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { Picker } from "@react-native-picker/picker";
+import ResponsiveContainer from "../components/ResponsiveContainer";
+import HeaderComponent from "../components/Header";
+import { fetchMedicalProfessionals } from "../api/MedicalProfessional";
+import { postTelehealthData } from "../api/Telehealth";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 type RootStackParamList = {
-  MedicalProfessionalSelectionScreen: { selectedProgram: string; age: string; };
+  MedicalProfessionalSelectionScreen: { selectedProgram: string; age: string };
 };
 
 const TelehealthScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<any>>();
-  const [fullName, setFullName] = useState('');
-  const [weight, setWeight] = useState('');
-  const [height, setHeight] = useState('');
+  const [fullName, setFullName] = useState("");
+  const [weight, setWeight] = useState("");
+  const [height, setHeight] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState(new Date());
-  const [gender, setGender] = useState('');
+  const [gender, setGender] = useState("");
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
   const [professionals, setProfessionals] = useState<any[]>([]);
-  const [selectedProfessional, setSelectedProfessional] = useState<string | null>(null);
+  const [selectedProfessional, setSelectedProfessional] = useState<
+    string | null
+  >(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState<boolean>(false);
@@ -38,28 +50,34 @@ const TelehealthScreen: React.FC = () => {
         setLoading(true);
         try {
           const data = await fetchMedicalProfessionals();
-          
+
           // Filter professionals based on selected program
           const filteredProfessionals = data.filter((item: any) => {
-            if (selectedProgram === 'Nutrition') {
-              return item.attributes.job_title === 'Nutrisionis' || item.attributes.job_title === 'Dietisien';
-            } else if (selectedProgram === 'Mental Health') {
-              return item.attributes.job_title === 'Psikolog';
+            if (selectedProgram === "Nutrition") {
+              return (
+                item.attributes.job_title === "Nutrisionis" ||
+                item.attributes.job_title === "Dietisien"
+              );
+            } else if (selectedProgram === "Mental Health") {
+              return item.attributes.job_title === "Psikolog";
             }
             return true;
           });
-  
-          setProfessionals(filteredProfessionals.map((item: any) => ({
-            name: item.attributes.name,
-            job: item.attributes.job_title,
-            schedule: item.attributes.schedule,
-            str: item.attributes.str_number,
-          })));
-  
+
+          setProfessionals(
+            filteredProfessionals.map((item: any) => ({
+              id: item.id, // ID dari konsultan
+              name: item.attributes.name,
+              job: item.attributes.job_title,
+              schedule: item.attributes.schedule,
+              str: item.attributes.str_number,
+            }))
+          );
+
           setLoading(false);
         } catch (error) {
           setLoading(false);
-          setError('Failed to fetch professionals. Please try again.');
+          setError("Failed to fetch professionals. Please try again.");
         }
       };
       loadProfessionals();
@@ -93,15 +111,15 @@ const TelehealthScreen: React.FC = () => {
     } else if (step === 3 && selectedProgram && selectedProfessional) {
       const age = calculateAge(dateOfBirth);
 
-      let category = '';
-      let programme = '';
+      let category = "";
+      let programme = "";
 
-      if (selectedProgram === 'Mental Health') {
-        category = 'mental_health';
-        programme = 'Mental Health';
-      } else if (selectedProgram === 'Nutrition') {
-        category = 'gizi';
-        programme = 'Nutrition';
+      if (selectedProgram === "Mental Health") {
+        category = "mental_health";
+        programme = "Mental Health";
+      } else if (selectedProgram === "Nutrition") {
+        category = "gizi";
+        programme = "Nutrition";
       } else {
         Alert.alert(
           "Kesalahan Program",
@@ -121,13 +139,15 @@ const TelehealthScreen: React.FC = () => {
           dob: Math.floor(dateOfBirth.getTime() / 1000),
           gender,
         },
-        professional: selectedProfessional,
+        professional: selectedProfessional, // ID konsultan
       };
 
       try {
         await postTelehealthData(data, selectedProgram);
-        navigation.navigate('Home');
-        alert('Data konsultasi berhasil ditambahkan, mohon cek halaman notifikasi untuk melihat konsultasi Anda.');
+        navigation.navigate("Home");
+        alert(
+          "Data konsultasi berhasil ditambahkan, mohon cek halaman notifikasi untuk melihat konsultasi Anda."
+        );
       } catch (error) {
         Alert.alert(
           "Gagal Mengirim Data",
@@ -186,31 +206,66 @@ const TelehealthScreen: React.FC = () => {
             <Text style={styles.title}>Telehealth</Text>
             <Text style={styles.subtitle}>Konsultasi dengan Profesional</Text>
             <Text style={styles.description}>
-              Sebelum bisa konsultasi langsung dengan tenaga kesehatan, mari isi data diri kamu disini!
+              Sebelum bisa konsultasi langsung dengan tenaga kesehatan, mari isi
+              data diri kamu disini!
             </Text>
 
-            <InputComponent placeholder="Nama Lengkap" value={fullName} onChangeText={setFullName} />
-            <InputComponent placeholder="Berat (Kg)" value={weight} onChangeText={setWeight} keyboardType="numeric" />
-            <InputComponent placeholder="Tinggi (Cm)" value={height} onChangeText={setHeight} keyboardType="numeric" />
+            <InputComponent
+              placeholder="Nama Lengkap"
+              value={fullName}
+              onChangeText={setFullName}
+            />
+            <InputComponent
+              placeholder="Berat (Kg)"
+              value={weight}
+              onChangeText={setWeight}
+              keyboardType="numeric"
+            />
+            <InputComponent
+              placeholder="Tinggi (Cm)"
+              value={height}
+              onChangeText={setHeight}
+              keyboardType="numeric"
+            />
 
             <Text style={styles.dateLabel}>Tanggal Konsultasi</Text>
-            <TouchableOpacity onPress={openDatePicker} style={styles.datePicker}>
+            <TouchableOpacity
+              onPress={openDatePicker}
+              style={styles.datePicker}
+            >
               <Text style={styles.datePickerText}>
-                {dateOfBirth ? dateOfBirth.toLocaleDateString() : 'Tanggal Lahir'}
+                {dateOfBirth
+                  ? dateOfBirth.toLocaleDateString()
+                  : "Tanggal Lahir"}
               </Text>
               <MaterialIcons name="calendar-today" size={24} color="#0FA18C" />
             </TouchableOpacity>
-            {showDatePicker && <DateTimePicker value={dateOfBirth} mode="date" display="default" onChange={onDateChange} />}
+            {showDatePicker && (
+              <DateTimePicker
+                value={dateOfBirth}
+                mode="date"
+                display="default"
+                onChange={onDateChange}
+              />
+            )}
 
             <View style={styles.pickerContainer}>
-              <Picker selectedValue={gender} onValueChange={(itemValue) => setGender(itemValue)} style={styles.picker}>
+              <Picker
+                selectedValue={gender}
+                onValueChange={(itemValue) => setGender(itemValue)}
+                style={styles.picker}
+              >
                 <Picker.Item label="Gender" value="" />
                 <Picker.Item label="Laki-laki" value="male" />
                 <Picker.Item label="Perempuan" value="female" />
               </Picker>
             </View>
 
-            <ButtonComponent title="Lanjut" onPress={handleLanjutPress} disabled={isButtonDisabled()} />
+            <ButtonComponent
+              title="Lanjut"
+              onPress={handleLanjutPress}
+              disabled={isButtonDisabled()}
+            />
           </>
         )}
 
@@ -218,35 +273,55 @@ const TelehealthScreen: React.FC = () => {
         {step === 2 && (
           <>
             <Text style={styles.title}>Pilih Program</Text>
-            <Text style={styles.titleDescription}>Pilih program konsultasi yang kamu butuhkan!</Text>
+            <Text style={styles.titleDescription}>
+              Pilih program konsultasi yang kamu butuhkan!
+            </Text>
 
             <TouchableOpacity
-              style={[styles.programButton, selectedProgram === 'Mental Health' && styles.selectedButton]}
-              onPress={() => setSelectedProgram('Mental Health')}
+              style={[
+                styles.programButton,
+                selectedProgram === "Mental Health" && styles.selectedButton,
+              ]}
+              onPress={() => setSelectedProgram("Mental Health")}
             >
-              <Image source={require('../../assets/mental-notif.png')} style={styles.programLogo} />
+              <Image
+                source={require("../../assets/mental-notif.png")}
+                style={styles.programLogo}
+              />
               <View style={styles.programTextContainer}>
                 <Text style={styles.programTitle}>Mental Health</Text>
                 <Text style={styles.programDescription}>
-                  Bagi yang ingin konsultasi terkait kesehatan mental, curhat, atau bagi yang memiliki masalah dalam mengatur emosi.
+                  Bagi yang ingin konsultasi terkait kesehatan mental, curhat,
+                  atau bagi yang memiliki masalah dalam mengatur emosi.
                 </Text>
               </View>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.programButton, selectedProgram === 'Nutrition' && styles.selectedButton]}
-              onPress={() => setSelectedProgram('Nutrition')}
+              style={[
+                styles.programButton,
+                selectedProgram === "Nutrition" && styles.selectedButton,
+              ]}
+              onPress={() => setSelectedProgram("Nutrition")}
             >
-              <Image source={require('../../assets/gizi-notif.png')} style={styles.programLogo} />
+              <Image
+                source={require("../../assets/gizi-notif.png")}
+                style={styles.programLogo}
+              />
               <View style={styles.programTextContainer}>
                 <Text style={styles.programTitle}>Nutrition</Text>
                 <Text style={styles.programDescription}>
-                  Bagi yang ingin konsultasi terkait masalah gizi, diet, dan pola makan sehat.
+                  Bagi yang ingin konsultasi terkait masalah gizi, diet, dan
+                  pola makan sehat.
                 </Text>
               </View>
             </TouchableOpacity>
 
-            <ButtonComponent title="Lanjut" onPress={handleLanjutPress} disabled={isButtonDisabled()} />
+            <ButtonComponent
+              title="Lanjut"
+              onPress={handleLanjutPress}
+              disabled={isButtonDisabled()}
+            />
           </>
         )}
 
@@ -254,7 +329,9 @@ const TelehealthScreen: React.FC = () => {
         {step === 3 && (
           <>
             <Text style={styles.title}>Pilih Profesional</Text>
-            <Text style={styles.titleDescription}>Pilih tenaga profesional yang kamu inginkan.</Text>
+            <Text style={styles.titleDescription}>
+              Pilih tenaga profesional yang kamu inginkan.
+            </Text>
 
             {loading ? (
               <ActivityIndicator size="large" color="#18B2A0" />
@@ -263,18 +340,32 @@ const TelehealthScreen: React.FC = () => {
                 {professionals.map((professional, index) => (
                   <TouchableOpacity
                     key={index}
-                    style={[styles.professionalItem, selectedProfessional === professional.name && styles.selectedButton]}
-                    onPress={() => setSelectedProfessional(professional.name)}
+                    style={[
+                      styles.professionalItem,
+                      selectedProfessional === professional.id &&
+                        styles.selectedButton,
+                    ]}
+                    onPress={() => setSelectedProfessional(professional.id)}
                   >
-                    <Text style={styles.professionalName}>{professional.name}</Text>
-                    <Text style={styles.professionalDetails}>{professional.job}</Text>
-                    <Text style={styles.professionalDetails}>Jadwal: {professional.schedule}</Text>
+                    <Text style={styles.professionalName}>
+                      {professional.name}
+                    </Text>
+                    <Text style={styles.professionalDetails}>
+                      {professional.job}
+                    </Text>
+                    <Text style={styles.professionalDetails}>
+                      Jadwal: {professional.schedule}
+                    </Text>
                   </TouchableOpacity>
                 ))}
               </ScrollView>
             )}
 
-            <ButtonComponent title="Lanjut" onPress={handleLanjutPress} disabled={isButtonDisabled()} />
+            <ButtonComponent
+              title="Lanjut"
+              onPress={handleLanjutPress}
+              disabled={isButtonDisabled()}
+            />
           </>
         )}
       </ScrollView>
@@ -289,18 +380,18 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   subtitle: {
     fontSize: 18,
     marginVertical: 10,
-    color: '#0FA18C',
+    color: "#0FA18C",
   },
   description: {
     fontSize: 14,
     marginVertical: 10,
-    color: '#666',
+    color: "#666",
   },
   pickerContainer: {
     borderRadius: 50,
@@ -308,25 +399,25 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#0FA18C',
+    borderColor: "#0FA18C",
   },
   picker: {
     textAlign: "center",
     height: 30,
-    width: '100%',
-    color: '#333',
+    width: "100%",
+    color: "#333",
   },
   programButton: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: 15,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 8,
     marginBottom: 15,
   },
   selectedButton: {
-    borderColor: '#0FA18C',
-    backgroundColor: '#f4f7f9',
+    borderColor: "#0FA18C",
+    backgroundColor: "#f4f7f9",
   },
   programLogo: {
     width: 50,
@@ -338,48 +429,48 @@ const styles = StyleSheet.create({
   },
   programTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   programDescription: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
   titleDescription: {
     fontSize: 14,
     marginBottom: 20,
-    color: '#666',
+    color: "#666",
   },
   professionalItem: {
     padding: 15,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 8,
     marginBottom: 10,
   },
 
   professionalName: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   professionalDetails: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
   datePicker: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     borderWidth: 1,
-    borderColor: '#0FA18C',
+    borderColor: "#0FA18C",
     borderRadius: 50,
-    paddingVertical: '3%',
-    paddingHorizontal: '5%',
-    marginBottom: '5%',
+    paddingVertical: "3%",
+    paddingHorizontal: "5%",
+    marginBottom: "5%",
   },
   datePickerText: {
-    color: '#333',
+    color: "#333",
     flex: 1,
     fontSize: 16,
   },

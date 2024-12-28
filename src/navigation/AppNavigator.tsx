@@ -44,7 +44,9 @@ export type RootStackParamList = {
   NotificationScreen: undefined;
   ChangePassword: undefined;
   Certificate: undefined;
-Pretest: undefined
+  Pretest: undefined;
+  Home: undefined;
+  Posttest: undefined;
 };
 
 const BottomTabNavigation = () => (
@@ -58,16 +60,16 @@ const BottomTabNavigation = () => (
       tabBarInactiveTintColor: '#B0B0B0',
     }}
   >
-<Tab.Screen
-  name="Home"
-  component={HomeScreen}
-  options={{
-    headerShown: false,
-    tabBarIcon: ({ color, focused }) => (
-      <Ionicons name="home" size={focused ? 36 : 24} color={color} />
-    ),
-  }}
-/>
+    <Tab.Screen
+      name="Home"
+      component={HomeScreen}
+      options={{
+        headerShown: false,
+        tabBarIcon: ({ color, focused }) => (
+          <Ionicons name="home" size={focused ? 36 : 24} color={color} />
+        ),
+      }}
+    />
 
     <Tab.Screen
       name="Module"
@@ -82,7 +84,8 @@ const BottomTabNavigation = () => (
     <Tab.Screen
       name="Forum"
       component={ForumScreen}
-      options={{ headerShown: false,
+      options={{
+        headerShown: false,
         tabBarIcon: ({ color, focused }) => (
           <Ionicons name="chatbubbles" size={focused ? 36 : 24} color={color} />
         ),
@@ -150,8 +153,13 @@ const AppNavigator: React.FC = () => {
           component={EditProfileScreen}
           options={{ headerShown: true }}
         />
-                <Stack.Screen
+        <Stack.Screen
           name="Pretest"
+          component={PretestScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Posttest"
           component={PretestScreen}
           options={{ headerShown: false }}
         />

@@ -131,21 +131,21 @@ type BMIData = {
       const genderData = referenceBMIData[gender];
       ageData = genderData[age];
       if (!ageData) return "Age data not available";
-      if (bmi < ageData["-3SD"]) return "Severely underweight";
-      if (bmi >= ageData["-3SD"] && bmi < ageData["-2SD"]) return "Moderately underweight";
-      if (bmi >= ageData["-2SD"] && bmi < ageData["-1SD"]) return "Mildly underweight";
-      if (bmi >= ageData["-1SD"] && bmi <= ageData["+1SD"]) return "Normal weight";
-      if (bmi > ageData["+1SD"] && bmi <= ageData["+2SD"]) return "Overweight";
-      if (bmi > ageData["+2SD"]) return "Obese";
+  
+      if (bmi < 17.0) return "Kurus";
+      if (bmi >= 17.0 && bmi <= 18.4) return "Kurus ringan";
+      if (bmi >= 18.5 && bmi <= 25.0) return "Normal";
+      if (bmi > 25.0 && bmi <= 27.0) return "Gemuk ringan";
+      if (bmi > 27.0) return "Gemuk";
     }
   
     // Handle adult data (for age 19 and above)
     if (gender === "adults") {
-      const adultData = referenceBMIData.adults[99]; // Use same data for all ages 19-99
-      if (bmi < adultData["-2SD"]) return "Underweight";
-      if (bmi >= adultData["-2SD"] && bmi <= adultData["+1SD"]) return "Normal weight";
-      if (bmi > adultData["+1SD"] && bmi <= adultData["+2SD"]) return "Overweight";
-      if (bmi > adultData["+2SD"]) return "Obese";
+      if (bmi < 17.0) return "Kurus";
+      if (bmi >= 17.0 && bmi <= 18.4) return "Kurus ringan";
+      if (bmi >= 18.5 && bmi <= 25.0) return "Normal";
+      if (bmi > 25.0 && bmi <= 27.0) return "Gemuk ringan";
+      if (bmi > 27.0) return "Gemuk";
     }
   
     return "Category not defined";

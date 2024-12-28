@@ -8,11 +8,13 @@ import {
   ImageBackground,
   Image,
   ScrollView,
+  RefreshControl,
 } from "react-native";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import ResponsiveContainer from "../components/ResponsiveContainer";
 import UserCard from "../components/UserCard";
 import WeightBox from "../components/BoxComponents/WeightBox";
@@ -20,6 +22,8 @@ import WeightBox from "../components/BoxComponents/WeightBox";
 import { getToken } from "../utils/handlingDataLogin";
 import { calculateBMI, getNutritionalStatus } from "../helper/bmiHelper";
 import { getUserDetails } from "../api/User";
+import ProgramCard from "../components/ProgramCard";
+import DebugScreen from "../components/ResetButton";
 
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<any>>();
@@ -27,51 +31,85 @@ const HomeScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<string>("");
   const [error, setError] = useState(false);
+  const [isPretestCompleted, setIsPretestCompleted] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const data = await getUserDetails();
-        const userDetails = data?.user_detail?.information;
+  // Add a state to manage the pull-to-refresh behavior
+  const [refreshing, setRefreshing] = useState(false);
 
-        if (userDetails) {
-          const bmi = calculateBMI(userDetails.weight, userDetails.height);
-          const nutritionalStatus = getNutritionalStatus(bmi);
-          setStatus(nutritionalStatus);
+  // Function to fetch user data
+  const fetchUserData = async () => {
+    try {
+      const data = await getUserDetails();
+      const userDetails = data?.user_detail?.information;
 
-          setUserData({
-            name: userDetails.full_name,
-            height: userDetails.height,
-            weight: userDetails.weight,
-            gender: userDetails.gender, // Assuming gender is available here
-            bmi,
-            status: nutritionalStatus,
-          });
-        } else {
-          setError(true);
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
+      if (userDetails) {
+        const bmi = calculateBMI(userDetails.weight, userDetails.height);
+        const nutritionalStatus = getNutritionalStatus(bmi);
+        setStatus(nutritionalStatus);
+
+        setUserData({
+          name: userDetails.full_name,
+          height: userDetails.height,
+          weight: userDetails.weight,
+          gender: userDetails.gender, // Assuming gender is available here
+          bmi,
+          status: nutritionalStatus,
+        });
+      } else {
         setError(true);
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Function to check if pretest is completed
+  const checkPretestCompletion = async () => {
+    try {
+      const pretestCompleted = await AsyncStorage.getItem('pretestCompleted');
+      console.log('Fetched Pretest Status:', pretestCompleted); // Debugging log
+      setIsPretestCompleted(pretestCompleted);
+    } catch (error) {
+      console.error('Error checking pretest status:', error);
+    }
+  };
+
+  // Call functions on initial render
+  useEffect(() => {
     fetchUserData();
+    checkPretestCompletion();
   }, []);
+
+  // Refresh handler
+  const onRefresh = async () => {
+    setRefreshing(true);
+
+    // Re-fetch the user data and pretest completion status
+    await fetchUserData();
+    await checkPretestCompletion();
+
+    setRefreshing(false);
+  };
 
   const navigateTo = (screen: string) => {
     navigation.navigate(screen);
   };
 
+  // Ensure we are waiting for `isPretestCompleted` to be loaded before rendering
   if (loading) {
     return <ActivityIndicator size="large" color="#00b4ac" />;
   }
 
   return (
     <ResponsiveContainer>
-      <ScrollView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <ImageBackground
           source={require("../../assets/header.png")}
           style={styles.imageBackground}
@@ -122,28 +160,52 @@ const HomeScreen: React.FC = () => {
           </View>
         </TouchableOpacity>
 
+        <View style={styles.programContainer}>
+          <View style={styles.cardContainer}>
+            {/* <ProgramCard /> */}
+          </View>
+        </View>
+
         {userData && (
           <WeightBox
             initialWeight={userData.weight}
             height={userData.height}
-            gender={userData.gender}  // Now passing gender here
+            gender={userData.gender} // Now passing gender here
           />
         )}
 
-        <TouchableOpacity
-          onPress={() => navigateTo("Pretest")}
-          style={styles.ctaButton}
-        >
-          <LinearGradient
-            colors={["#4EAA9F", "#CAA638"]}
-            start={[0, 0]}
-            end={[1, 1]}
-            style={styles.gradient}
-          >
-            <Text style={styles.ctaTitle}>Post-Test</Text>
-            <Text style={styles.ctaSubtitle}>Ambil Post-Test mu Sekarang!</Text>
-          </LinearGradient>
-        </TouchableOpacity>
+      <TouchableOpacity
+  onPress={() => {
+    // Log the screen that is about to open based on pretest status
+    console.log("Navigating to screen:", isPretestCompleted === 'true' ? 'Posttest' : 'Pretest');
+    
+    // Check if pretest has been completed, then navigate accordingly
+    if (isPretestCompleted === 'true') {
+      navigation.navigate('Posttest');  // Navigate to PostTestScreen if pretest is completed
+    } else {
+      navigation.navigate('Pretest');  // Navigate to PretestScreen if pretest is not completed
+    }
+  }}
+  style={styles.ctaButton}
+>
+  <LinearGradient
+    colors={['#4EAA9F', '#CAA638']}
+    start={[0, 0]}
+    end={[1, 1]}
+    style={styles.gradient}
+  >
+    <Text style={styles.ctaTitle}>
+      {isPretestCompleted === 'true' ? 'Post-Test' : 'Pre-Test'}
+    </Text>
+    <Text style={styles.ctaSubtitle}>
+      {isPretestCompleted === 'true'
+        ? 'Ambil Post-Test mu Sekarang!'
+        : 'Ambil Pre-Test mu Sekarang!'}
+    </Text>
+  </LinearGradient>
+</TouchableOpacity>
+        
+        {/* <DebugScreen /> */}
       </ScrollView>
     </ResponsiveContainer>
   );
@@ -266,6 +328,16 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginVertical: 20,
+  },
+  programContainer: {
+    width: "100%",
+    marginTop: 20,
+  },
+  cardContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    paddingHorizontal: 16,
   },
 });
 

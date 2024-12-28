@@ -26,6 +26,7 @@ const LearningSessionScreen: React.FC = () => {
   const [answers, setAnswers] = useState<any[]>([]);
   const [selectedSegment, setSelectedSegment] = useState(0);
   const [completedSegments, setCompletedSegments] = useState<boolean[]>([]);
+  const [reportId, setReportId] = useState<string | null>(null); // Track report ID for PUT request
 
   useEffect(() => {
     if (selectedTopic) {
@@ -93,22 +94,51 @@ const LearningSessionScreen: React.FC = () => {
         return { id: answer.answerId, title: 'Unknown Answer', status: answer.status };
       });
 
-      await fetch('https://api-genfiit.yanginibeda.web.id/api/reports', {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          data: {
-            users_permissions_user: userID,
-            material_uuid: materialUUID,
-            material_slug: materialSlug,
-            answer: formattedAnswers,
+      // If reportId is null, create a new report (POST), otherwise update the existing one (PUT)
+      if (reportId) {
+        // PUT request to update the existing report
+        await fetch(`https://api-genfiit.yanginibeda.web.id/api/reports/${reportId}`, {
+          method: 'PUT',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
           },
-        }),
-      });
+          body: JSON.stringify({
+            data: {
+              users_permissions_user: userID,
+              material_uuid: materialUUID,
+              material_slug: materialSlug,
+              answer: formattedAnswers,
+              category: selectedTopic === 'Mental' ? 'mentalmodule' : 'gizimodule',
+              is_complete: false,
+            },
+          }),
+        });
+      } else {
+        // POST request to create a new report
+        const response = await fetch('https://api-genfiit.yanginibeda.web.id/api/reports', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            data: {
+              users_permissions_user: userID,
+              material_uuid: materialUUID,
+              material_slug: materialSlug,
+              answer: formattedAnswers,
+              category: selectedTopic === 'Mental' ? 'mentalmodule' : 'gizimodule',
+              is_complete: false,
+            },
+          }),
+        });
+
+        const data = await response.json();
+        setReportId(data.id); // Save the report ID to track for PUT requests
+      }
 
       const nextSegment = selectedSegment + 1;
       if (nextSegment < material?.data.length) {
@@ -145,10 +175,10 @@ const LearningSessionScreen: React.FC = () => {
               style={styles.card}
               onPress={() => {
                 setSelectedTopic('Mental');
-                // Resetting all previous data on category selection
                 setMaterial(null);
                 setAnswers([]);
                 setSelectedSegment(0);
+                setReportId(null); // Reset reportId when a new topic is selected
               }}
             >
               <Image
@@ -161,10 +191,10 @@ const LearningSessionScreen: React.FC = () => {
               style={styles.card}
               onPress={() => {
                 setSelectedTopic('Gizi');
-                // Resetting all previous data on category selection
                 setMaterial(null);
                 setAnswers([]);
                 setSelectedSegment(0);
+                setReportId(null); // Reset reportId when a new topic is selected
               }}
             >
               <Image
@@ -186,81 +216,79 @@ const LearningSessionScreen: React.FC = () => {
   const segmentTitle = `${segmentTitlePrefix} - Konten ${selectedSegment + 1}`;
 
   return (
-      <ResponsiveContainer>
-        <View style={styles.container}>
-          <HeaderComponent title={segmentTitle} />
-          <ScrollView contentContainerStyle={styles.scrollView}>
-            {/* Conditionally render the image for Gizi topic content */}
-            {selectedTopic === 'Gizi' && selectedSegment === 0 && (
-              <Image
-                source={require('../../assets/gizimodul1.png')}
-                style={styles.moduleImage}
-              />
-            )}
-            {selectedTopic === 'Gizi' && selectedSegment === 1 && (
-              <Image
-                source={require('../../assets/gizimodul2.png')}
-                style={styles.moduleImage}
-              />
-            )}
-    
-            {/* Conditionally render the image for Mental Health topic content */}
-            {selectedTopic === 'Mental' && selectedSegment === 0 && (
-              <Image
-                source={require('../../assets/mental1.png')}
-                style={styles.moduleImage}
-              />
-            )}
-            {selectedTopic === 'Mental' && selectedSegment === 1 && (
-              <Image
-                source={require('../../assets/mental2.png')}
-                style={styles.moduleImage}
-              />
-            )}
-    
-            <View style={styles.card}>
-              <Text style={[styles.header, styles.textLeft]}>{currentSegment.title || 'Title not available'}</Text>
-              <Text style={[styles.descriptionText, styles.textLeft]}>
-                {getDescriptionText(currentSegment.description) || 'Description not available'}
-              </Text>
-    
-              <FlatList
-                data={currentSegment.questions.slice(0, 2)} // Ensures only 2 questions are displayed per segment
-                keyExtractor={(q) => q.id.toString()}
-                renderItem={({ item: question }) => (
-                  <View style={styles.questionContainer}>
-                    <Text style={[styles.questionTitle, styles.textLeft]}>{question.title}</Text>
-                    {question.item.map((answer: any) => (
-                      <TouchableOpacity
-                        key={answer.id}
-                        style={[
-                          styles.answerButton,
-                          answers.some((a) => a.questionId === question.id && a.answerId === answer.id) &&
-                            styles.selectedAnswer,
-                        ]}
-                        onPress={() => handleAnswerSelection(question.id, answer.id)}>
-                        <View style={styles.dotContainer}>
-                          <View
-                            style={[
-                              styles.dot,
-                              answers.some((a) => a.questionId === question.id && a.answerId === answer.id) &&
-                                styles.filledDot,
-                            ]}
-                          />
-                          <Text style={styles.answerText}>{answer.title}</Text>
-                        </View>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-              />
-    
-              <ButtonComponent title="Submit Answer" onPress={submitAnswers} disabled={!isButtonActive} />
-            </View>
-          </ScrollView>
-        </View>
-      </ResponsiveContainer>
-    );  
+    <ResponsiveContainer>
+      <View style={styles.container}>
+        <HeaderComponent title={segmentTitle} />
+        <ScrollView contentContainerStyle={styles.scrollView}>
+          {selectedTopic === 'Gizi' && selectedSegment === 0 && (
+            <Image
+              source={require('../../assets/gizimodul1.png')}
+              style={styles.moduleImage}
+            />
+          )}
+          {selectedTopic === 'Gizi' && selectedSegment === 1 && (
+            <Image
+              source={require('../../assets/gizimodul2.png')}
+              style={styles.moduleImage}
+            />
+          )}
+
+          {selectedTopic === 'Mental' && selectedSegment === 0 && (
+            <Image
+              source={require('../../assets/mental1.png')}
+              style={styles.moduleImage}
+            />
+          )}
+          {selectedTopic === 'Mental' && selectedSegment === 1 && (
+            <Image
+              source={require('../../assets/mental2.png')}
+              style={styles.moduleImage}
+            />
+          )}
+
+          <View style={styles.card}>
+            <Text style={[styles.header, styles.textLeft]}>{currentSegment.title || 'Title not available'}</Text>
+            <Text style={[styles.descriptionText, styles.textLeft]}>
+              {getDescriptionText(currentSegment.description) || 'Description not available'}
+            </Text>
+
+            <FlatList
+              data={currentSegment.questions.slice(0, 2)} // Display 2 questions per segment
+              keyExtractor={(q) => q.id.toString()}
+              renderItem={({ item: question }) => (
+                <View style={styles.questionContainer}>
+                  <Text style={[styles.questionTitle, styles.textLeft]}>{question.title}</Text>
+                  {question.item.map((answer: any) => (
+                    <TouchableOpacity
+                      key={answer.id}
+                      style={[
+                        styles.answerButton,
+                        answers.some((a) => a.questionId === question.id && a.answerId === answer.id) &&
+                          styles.selectedAnswer,
+                      ]}
+                      onPress={() => handleAnswerSelection(question.id, answer.id)}>
+                      <View style={styles.dotContainer}>
+                        <View
+                          style={[
+                            styles.dot,
+                            answers.some((a) => a.questionId === question.id && a.answerId === answer.id) &&
+                              styles.filledDot,
+                          ]}
+                        />
+                        <Text style={styles.answerText}>{answer.title}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            />
+
+            <ButtonComponent title="Submit Answer" onPress={submitAnswers} disabled={!isButtonActive} />
+          </View>
+        </ScrollView>
+      </View>
+    </ResponsiveContainer>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -300,15 +328,17 @@ const styles = StyleSheet.create({
   descriptionText: {
     fontSize: 16,
     color: '#333',
+    lineHeight: 24, // Improved readability
   },
   questionContainer: {
     marginBottom: 15,
-    width: width - 40,
+    width: "auto",
   },
   questionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+    flexWrap: 'wrap',
   },
   answerButton: {
     padding: 10,
@@ -316,10 +346,15 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#f1f1f1',
     width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
   },
   answerText: {
     fontSize: 16,
     color: '#333',
+    flex: 1, 
+    flexWrap: 'wrap', // Allow the text to wrap
   },
   dotContainer: {
     flexDirection: 'row',

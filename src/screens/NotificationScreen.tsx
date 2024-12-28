@@ -24,7 +24,13 @@ interface Notification {
     category: string;
     createdAt: string;
     status: string; // status: "in_progress" or "done"
+    consultant: {
+        name: string;
+        job_title: string;
+        schedule: string;
+    } | null;
 }
+
 
 const NotificationScreen: React.FC = () => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -65,7 +71,12 @@ const NotificationScreen: React.FC = () => {
                 category: item.attributes.category,
                 createdAt: item.attributes.createdAt,
                 status: item.attributes.status,
+                consultant: item.attributes.consultant?.data
+                    ? { name: item.attributes.consultant.data.attributes.name }
+                    : null,
             }));
+            
+            
 
             setNotifications(formattedData);
         } catch (error) {
@@ -96,33 +107,37 @@ const NotificationScreen: React.FC = () => {
         );
     }
 
-    const openWhatsApp = (name: string, category: string) => {
-        const bodyMessage = generateWhatsAppMessage(name, category);
+    const openWhatsApp = (name: string, category: string, consultantName?: string) => {
+        const bodyMessage = generateWhatsAppMessage(name, category, consultantName);
         const url = `https://wa.me/628128470419?text=${encodeURIComponent(bodyMessage)}`;
-
+    
         Linking.openURL(url).catch(() =>
             Alert.alert("Error", "Tidak dapat membuka WhatsApp")
         );
     };
-    const renderNotification = ({ item }: { item: Notification }) => {
-        console.log(item.category); // Debug: Periksa nilai category
-        return (
-            <NotificationBox
-                name={item.name}
-                category={item.category}
-                createdAt={new Date(item.createdAt).toLocaleString("id-ID", {
-                    weekday: "long",
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                    hour: "numeric",
-                    minute: "numeric",
-                })}
-                status={item.status}
-                onChatPress={() => openWhatsApp(item.name, item.category)}
-            />
-        );
-    };
+    
+    // Contoh pemanggilan dalam renderNotification
+    const renderNotification = ({ item }: { item: Notification }) => (
+        <NotificationBox
+            name={item.name}
+            category={item.category}
+            createdAt={new Date(item.createdAt).toLocaleString("id-ID", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+                hour: "numeric",
+                minute: "numeric",
+            })}
+            status={item.status}
+            onChatPress={() =>
+                openWhatsApp(item.name, item.category, item.consultant?.name)
+            }
+            consultant={item.consultant}
+        />
+    );
+    
+    
     
 
     return (
@@ -154,7 +169,11 @@ interface NotificationBoxProps {
     createdAt: string;
     status: string;
     onChatPress: () => void;
+    consultant: {
+        name: string;
+    } | null;
 }
+
 
 const NotificationBox: React.FC<NotificationBoxProps> = ({
     name,
@@ -162,6 +181,7 @@ const NotificationBox: React.FC<NotificationBoxProps> = ({
     createdAt,
     status,
     onChatPress,
+    consultant,
 }) => (
     <View style={styles.notificationBox}>
         <View style={styles.header}>
@@ -181,14 +201,26 @@ const NotificationBox: React.FC<NotificationBoxProps> = ({
                 {status === "in_progress" ? "Sedang Berjalan" : "Selesai"}
             </Text>
         </View>
+
         <Text style={styles.subtitle}>
-    <MaterialIcons name="category" size={16} color="#555" />{" "}
-    {category === "gizi"
-        ? "KONSULTASI GIZI"
-        : category === "mental_health"
-        ? "KONSULTASI MENTAL HEALTH"
-        : "Kategori Tidak Dikenal"}
-</Text>
+            <MaterialIcons name="category" size={16} color="#555" />{" "}
+            {category === "gizi"
+                ? "KONSULTASI GIZI"
+                : category === "mental_health"
+                ? "KONSULTASI MENTAL HEALTH"
+                : "Kategori Tidak Dikenal"}
+        </Text>
+
+        {/* Tampilkan nama konsultan dengan ikon */}
+        {consultant?.name && (
+            <View style={styles.consultantContainer}>
+                <FontAwesome name="user-md" size={20} color="#04D1A1" />
+                <Text style={styles.consultantText}>
+                    <Text style={styles.consultantLabel}></Text>
+                    {consultant.name}
+                </Text>
+            </View>
+        )}
 
         <TouchableOpacity
             style={[
@@ -290,6 +322,22 @@ const styles = StyleSheet.create({
         fontSize: 14,
         marginLeft: 10,
     },
+    consultantContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginTop: 10,
+    },
+    consultantText: {
+        fontSize: 14,
+        color: "#555",
+        marginLeft: 10,
+        fontWeight: 'bold',
+        marginBottom: 10
+    },
+    consultantLabel: {
+        fontWeight: "bold",
+        color: "#333",
+    },
 });
 
-export default NotificationScreen;
+export default NotificationScreen

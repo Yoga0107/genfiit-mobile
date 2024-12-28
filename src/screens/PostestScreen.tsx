@@ -8,22 +8,27 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 
 const { width, height } = Dimensions.get('window');
 
-type NavigationProps = StackNavigationProp<RootStackParamList, 'Pretest'>;
+type NavigationProps = StackNavigationProp<RootStackParamList, 'Posttest'>;
 
-const PretestScreen: React.FC = () => {
+const PostTestScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProps>();
-  const jotformUrl = 'https://form.jotform.com/243614932431453';
+
+  // Correct Post-Test URL
+  const jotformUrl = 'https://form.jotform.com/243615245421450';
 
   const handleWebViewNavigationStateChange = async (navState: WebViewNavigation) => {
     const { url } = navState;
 
+    console.log("Navigated URL: ", url); // Log to see the URL being loaded
+
+    // Check if the URL includes the thank-you page or submit page, indicating that the form is submitted
     if (url.includes('thank-you') || url.includes('submit.jotform.com')) {
       try {
-        await AsyncStorage.setItem('pretestCompleted', 'true');
-        console.log('Pretest completed status saved.');
+        await AsyncStorage.setItem('posttestCompleted', 'true');
+        console.log('Posttest completed status saved.');
         Alert.alert(
           'Form Completed',
-          'Thank you for completing the form!',
+          'Thank you for completing the post-test!',
           [
             {
               text: 'OK',
@@ -32,7 +37,7 @@ const PretestScreen: React.FC = () => {
           ]
         );
       } catch (error) {
-        console.error('Error saving pretest status:', error);
+        console.error('Error saving posttest status:', error);
       }
     }
   };
@@ -46,7 +51,7 @@ const PretestScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <WebView
-        source={{ uri: jotformUrl }}
+        source={{ uri: jotformUrl }} // Use the correct Post-Test URL here
         style={styles.webview}
         javaScriptEnabled={true}
         domStorageEnabled={true}
@@ -76,4 +81,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PretestScreen;
+export default PostTestScreen;

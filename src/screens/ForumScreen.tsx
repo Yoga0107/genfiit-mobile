@@ -620,9 +620,8 @@ const styles = StyleSheet.create({
   },
   mainContainer: {
     flex: 1,
-    paddingTop: 20,
-    backgroundColor: '#fff',
-    marginVertical: 50, 
+    paddingTop: 30,
+    backgroundColor: '#fff', 
   },
   blurBackground: {
     flex: 1,

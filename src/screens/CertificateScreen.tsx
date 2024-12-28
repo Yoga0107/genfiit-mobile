@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Alert, Dimensions, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Alert, Dimensions, RefreshControl, Image } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import HeaderComponent from '../components/Header';  
 import { getCompletionStatus } from '../utils/handlingDataLogin';  
@@ -19,13 +19,11 @@ const CertificateScreen: React.FC = () => {
 
   const canvasRef = useRef<Canvas | null>(null);  
 
-  
   const fetchCompletionStatus = async () => {
     const status = await getCompletionStatus();
     setCompletionStatus(status);  
   };
 
-  
   const fetchUserData = async () => {
     setLoading(true);
     try {
@@ -39,7 +37,6 @@ const CertificateScreen: React.FC = () => {
     }
   };
 
-  
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await fetchCompletionStatus();
@@ -56,71 +53,54 @@ const CertificateScreen: React.FC = () => {
     if (canvasRef.current) {
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
-  
-      
+    
       canvas.width = 900;
       canvas.height = 650;
-  
-      
+    
       context.fillStyle = '#00b4ac';  
       context.fillRect(0, 0, canvas.width, canvas.height);
-  
-      
+    
       context.lineWidth = 10;
       context.strokeStyle = '#ffffff';  
       context.shadowColor = '#000000'; 
       context.shadowBlur = 20;
       context.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
       context.shadowBlur = 0;  
-  
-      
+    
       context.font = 'bold 55px "Arial"';
       context.fillStyle = '#ffffff'; 
       context.textAlign = 'center';
       context.fillText('CERTIFICATE OF COMPLETION', canvas.width / 2, 100);
-  
-      
+    
       context.font = 'italic 35px "Arial"';
       context.fillStyle = '#ffffff'; 
       context.fillText(`Presented to: ${name}`, canvas.width / 2, 220);
-  
-      
+    
       context.font = 'bold 30px "Arial"';
       context.fillStyle = '#ffffff'; 
       context.fillText(`For Completing the Module:`, canvas.width / 2, 300);
       context.font = 'bold 32px "Arial"';
       context.fillText(module, canvas.width / 2, 350);
-  
-      
+    
       const date = new Date();
       context.font = 'italic 22px "Arial"';
       context.fillStyle = '#ffffff';
       context.fillText(`Date: ${date.toLocaleDateString()}`, canvas.width / 2, 420);
-  
-      
-      context.beginPath();
-      context.arc(canvas.width / 2, canvas.height - 150, 60, 0, Math.PI * 2); 
-      context.fillStyle = '#ffd700';  
-      context.fill(); 
-      context.closePath();
-  
+    
       context.fillStyle = '#ffffff';  
-      context.font = 'bold 30px Arial';
-      context.fillText('🏆', canvas.width / 2 - 15, canvas.height - 145);  
-  
-      
+      context.font = 'bold 100px Arial'; 
+      context.fillText('🏆', canvas.width / 2 - 2, canvas.height - 100); 
+    
       canvas.toDataURL().then(async (dataUrl) => {
         try {
           const path = FileSystem.documentDirectory + `sertifikat_${name}_${module}.png`;
-  
-          
+    
           await FileSystem.writeAsStringAsync(path, dataUrl.replace('data:image/png;base64,', ''), {
             encoding: FileSystem.EncodingType.Base64,
           });
-  
+    
           Alert.alert("Certificate Saved", `Your certificate has been saved to ${path}`);
-  
-          
+    
           const { status } = await MediaLibrary.requestPermissionsAsync();
           if (status === 'granted') {
             const asset = await MediaLibrary.createAssetAsync(path);
@@ -136,6 +116,7 @@ const CertificateScreen: React.FC = () => {
       });
     }
   };
+  
 
   const handleGenerateCertificate = (module: string) => {
     if (userData) {
@@ -176,8 +157,11 @@ const CertificateScreen: React.FC = () => {
                 style={[styles.certificateCard, styles.nutritionCard]}
                 onPress={() => handleGenerateCertificate("Nutrition Learning")}
               >
+                <Image 
+                  source={require('../../assets/gizi-certif.png')} 
+                  style={styles.certImage}
+                />
                 <View style={styles.certificateContent}>
-                  <MaterialCommunityIcons name="food-apple" size={100} color="#ff7043" />
                   <Text style={styles.certTitleText}>Nutrition Learning</Text>
                   <Text style={styles.certNameText}>{userData?.full_name}</Text>
                 </View>
@@ -188,8 +172,11 @@ const CertificateScreen: React.FC = () => {
                 style={[styles.certificateCard, styles.mentalHealthCard]}
                 onPress={() => handleGenerateCertificate("Mental Health Learning")}
               >
+                <Image 
+                  source={require('../../assets/mentalhealth-certif.png')} 
+                  style={styles.certImage}
+                />
                 <View style={styles.certificateContent}>
-                  <MaterialCommunityIcons name="heart-pulse" size={100} color="#00b4ac" />
                   <Text style={styles.certTitleText}>Mental Health Learning</Text>
                   <Text style={styles.certNameText}>{userData?.full_name}</Text>
                 </View>
@@ -197,7 +184,6 @@ const CertificateScreen: React.FC = () => {
             </>
           )}
         </View>
-
 
         <Canvas ref={canvasRef} style={{ display: 'none' }} />
       </ScrollView>
@@ -215,20 +201,21 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   certificatesTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 20,
     color: '#333',
+    textAlign: 'center',
   },
   certificateCard: {
-    marginBottom: 15,
-    borderRadius: 8,
+    marginBottom: 20,
+    borderRadius: 10,
     overflow: 'hidden',
     backgroundColor: '#fff',
     shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 3,
+    shadowOpacity: 0.15,
+    shadowRadius: 15,
+    elevation: 5,
   },
   nutritionCard: {
     backgroundColor: '#ffe0b2',
@@ -236,20 +223,26 @@ const styles = StyleSheet.create({
   mentalHealthCard: {
     backgroundColor: '#b2ebf2',
   },
+  certImage: {
+    width: width - 32,
+    height: 180,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
   certificateContent: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
+    padding: 10,
   },
   certTitleText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
     marginTop: 10,
   },
   certNameText: {
-    fontSize: 16,
-    color: '#333',
+    fontSize: 18,
+    color: '#555',
     marginTop: 5,
   },
   noCertificates: {

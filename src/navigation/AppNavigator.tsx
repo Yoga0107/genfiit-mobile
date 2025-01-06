@@ -23,6 +23,8 @@ import ChangePasswordScreen from '../screens/ChangePasswordScreen';
 import CertificateScreen from '../screens/CertificateScreen';
 import QuestionSessionScreen from '../screens/QuestionSessionScreen';
 import PretestScreen from '../screens/PretestScreen';
+import ContentScreen from '../screens/ContentScreen';
+import ContentDetailScreen from '../screens/ContentDetailScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -47,6 +49,8 @@ export type RootStackParamList = {
   Pretest: undefined;
   Home: undefined;
   Posttest: undefined;
+  ContentScreen: undefined;
+  ContentDetail: {id: string};
 };
 
 const BottomTabNavigation = () => (
@@ -166,6 +170,16 @@ const AppNavigator: React.FC = () => {
         <Stack.Screen
           name="Telehealth"
           component={TelehealthScreen}
+          options={{ headerShown: false }}
+        />
+               <Stack.Screen
+          name="ContentDetail"
+          component={ContentDetailScreen}
+          options={{ headerShown: false }}
+        />
+                <Stack.Screen
+          name="ContentScreen"
+          component={ContentScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen name="NotificationScreen" component={NotificationScreen} options={{ headerShown: false }} />

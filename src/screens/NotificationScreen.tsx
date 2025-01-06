@@ -23,7 +23,8 @@ interface Notification {
     name: string;
     category: string;
     createdAt: string;
-    status: string; // status: "in_progress" or "done"
+    status: string; // Status: "in_progress" atau "done"
+    dob: number | null; // DOB dalam epoch time (timestamp)
     consultant: {
         name: string;
         job_title: string;
@@ -31,24 +32,24 @@ interface Notification {
     } | null;
 }
 
-
 const NotificationScreen: React.FC = () => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [userId, setUserId] = useState<number | null>(null);
     const [refreshing, setRefreshing] = useState<boolean>(false);
 
+    // Fungsi untuk mendapatkan notifikasi
     const fetchNotifications = async () => {
         try {
             const token = await getToken();
             const id = await getID();
-
+    
             if (!id || isNaN(Number(id))) {
                 throw new Error("Invalid user ID");
             }
-
+    
             setUserId(Number(id));
-
+    
             const response = await fetch(
                 `https://api-genfiit.yanginibeda.web.id/api/telehealths?filters[users_permissions_user][id][$eq]=${id}&populate=*`,
                 {
@@ -58,26 +59,34 @@ const NotificationScreen: React.FC = () => {
                     },
                 }
             );
-
+    
             if (!response.ok) {
                 throw new Error(`Error fetching notifications: ${response.statusText}`);
             }
-
+    
             const json = await response.json();
-
+    
+            // Check the response data to ensure dob is available and properly converted
+            console.log("Response data:", json);
+    
             const formattedData = json.data.map((item: any) => ({
                 id: item.id,
                 name: item.attributes.user.name,
                 category: item.attributes.category,
                 createdAt: item.attributes.createdAt,
                 status: item.attributes.status,
+                dob: item.attributes.user.dob
+                    ? new Date(Number(item.attributes.user.dob) * 1000).getTime() // Convert epoch to milliseconds
+                    : null,
                 consultant: item.attributes.consultant?.data
-                    ? { name: item.attributes.consultant.data.attributes.name }
+                    ? {
+                          name: item.attributes.consultant.data.attributes.name,
+                          job_title: item.attributes.consultant.data.attributes.job_title,
+                          schedule: item.attributes.consultant.data.attributes.schedule,
+                      }
                     : null,
             }));
-            
-            
-
+    
             setNotifications(formattedData);
         } catch (error) {
             console.error("Error fetching notifications:", error);
@@ -87,28 +96,34 @@ const NotificationScreen: React.FC = () => {
         }
     };
 
+    // Gunakan efek untuk memuat notifikasi secara berkala
     useEffect(() => {
         fetchNotifications();
         const interval = setInterval(fetchNotifications, 5000);
         return () => clearInterval(interval);
     }, []);
 
+    // Fungsi refresh
     const onRefresh = async () => {
         setRefreshing(true);
         await fetchNotifications();
         setRefreshing(false);
     };
 
-    if (loading) {
-        return (
-            <View style={styles.container}>
-                <Text>Loading...</Text>
-            </View>
+    // Fungsi untuk membuka WhatsApp dengan pesan terformat
+    const openWhatsApp = (
+        name: string,
+        category: string,
+        dob?: number, // dob as epoch timestamp for consultation date
+        consultantName?: string
+    ) => {
+        console.log("DOB passed:", dob);  // Check if dob is passed correctly
+        const bodyMessage = generateWhatsAppMessage(
+            name,
+            category,
+            consultantName,
+            dob // Ensure dob is being passed correctly
         );
-    }
-
-    const openWhatsApp = (name: string, category: string, consultantName?: string) => {
-        const bodyMessage = generateWhatsAppMessage(name, category, consultantName);
         const url = `https://wa.me/628128470419?text=${encodeURIComponent(bodyMessage)}`;
     
         Linking.openURL(url).catch(() =>
@@ -116,7 +131,9 @@ const NotificationScreen: React.FC = () => {
         );
     };
     
-    // Contoh pemanggilan dalam renderNotification
+
+
+    // Komponen untuk merender tiap notifikasi
     const renderNotification = ({ item }: { item: Notification }) => (
         <NotificationBox
             name={item.name}
@@ -131,22 +148,32 @@ const NotificationScreen: React.FC = () => {
             })}
             status={item.status}
             onChatPress={() =>
-                openWhatsApp(item.name, item.category, item.consultant?.name)
+                openWhatsApp(
+                    item.name,
+                    item.category,
+                    item.dob ?? undefined,
+                    item.consultant?.name
+                )
             }
             consultant={item.consultant}
         />
     );
-    
-    
-    
 
+    // Tampilan loading
+    if (loading) {
+        return (
+            <View style={styles.container}>
+                <Text>Loading...</Text>
+            </View>
+        );
+    }
+
+    // Tampilan utama
     return (
         <ResponsiveContainer>
             <HeaderComponent title="Notifikasi" />
             <View style={styles.container}>
-                {loading ? (
-                    <Text style={styles.loadingText}>Memuat data...</Text>
-                ) : notifications.length === 0 ? (
+                {notifications.length === 0 ? (
                     <Text style={styles.emptyText}>Tidak ada notifikasi tersedia.</Text>
                 ) : (
                     <FlatList
@@ -171,10 +198,12 @@ interface NotificationBoxProps {
     onChatPress: () => void;
     consultant: {
         name: string;
+        job_title: string;
+        schedule: string;
     } | null;
 }
 
-
+// Komponen untuk kotak notifikasi
 const NotificationBox: React.FC<NotificationBoxProps> = ({
     name,
     category,
@@ -207,17 +236,15 @@ const NotificationBox: React.FC<NotificationBoxProps> = ({
             {category === "gizi"
                 ? "KONSULTASI GIZI"
                 : category === "mental_health"
-                ? "KONSULTASI MENTAL HEALTH"
-                : "Kategori Tidak Dikenal"}
+                    ? "KONSULTASI MENTAL HEALTH"
+                    : "Kategori Tidak Dikenal"}
         </Text>
 
-        {/* Tampilkan nama konsultan dengan ikon */}
-        {consultant?.name && (
+        {consultant && (
             <View style={styles.consultantContainer}>
                 <FontAwesome name="user-md" size={20} color="#04D1A1" />
                 <Text style={styles.consultantText}>
-                    <Text style={styles.consultantLabel}></Text>
-                    {consultant.name}
+                    {consultant.name} - {consultant.job_title}
                 </Text>
             </View>
         )}

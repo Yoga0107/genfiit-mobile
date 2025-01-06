@@ -11,6 +11,7 @@ import ResponsiveContainer from '../components/ResponsiveContainer';
 type RootStackParamList = {
   LearningSession: undefined;
   PilihKategoriModul: undefined;
+  ContentScreen: { category: string };
 };
 
 type LearningSessionNavigationProp = NavigationProp<RootStackParamList, 'LearningSession'>;
@@ -20,150 +21,10 @@ const { width } = Dimensions.get('window');
 const LearningSessionScreen: React.FC = () => {
   const navigation = useNavigation<LearningSessionNavigationProp>();
   const [selectedTopic, setSelectedTopic] = useState<'Mental' | 'Gizi' | null>(null);
-  const [material, setMaterial] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [isButtonActive, setIsButtonActive] = useState(false);
-  const [answers, setAnswers] = useState<any[]>([]);
-  const [selectedSegment, setSelectedSegment] = useState(0);
-  const [completedSegments, setCompletedSegments] = useState<boolean[]>([]);
-  const [reportId, setReportId] = useState<string | null>(null); // Track report ID for PUT request
 
-  useEffect(() => {
-    if (selectedTopic) {
-      setLoading(true);
-      const fetchData = async () => {
-        try {
-          const token = await getToken();
-          if (!token) return;
-          const categorySlug = selectedTopic === 'Mental' ? 'mentalmodule' : 'gizimodule';
-          const data = await getMaterialData(token, categorySlug);
-          setMaterial(data);
-          setCompletedSegments(new Array(data.data.length).fill(false));
-          setLoading(false);
-        } catch {
-          setLoading(false);
-        }
-      };
-      fetchData();
-    }
-  }, [selectedTopic]);
-
-  const handleAnswerSelection = (questionId: string, answerId: string) => {
-    setAnswers((prev) => {
-      const updatedAnswers = [...prev];
-      const existingIndex = updatedAnswers.findIndex((a) => a.questionId === questionId);
-      if (existingIndex !== -1) {
-        updatedAnswers[existingIndex] = { questionId, answerId, status: true };
-      } else {
-        updatedAnswers.push({ questionId, answerId, status: true });
-      }
-
-      const currentSegment = material?.data[selectedSegment];
-      const allAnswered = currentSegment?.questions.every((q: any) =>
-        updatedAnswers.some((a) => a.questionId === q.id && a.status)
-      );
-      setIsButtonActive(allAnswered);
-
-      return updatedAnswers;
-    });
+  const navigateToContentScreen = (topic: 'Mental' | 'Gizi') => {
+    navigation.navigate('ContentScreen', { category: topic === 'Mental' ? 'mentalmodule' : 'gizimodule' });
   };
-
-  const submitAnswers = async () => {
-    try {
-      const token = await getToken();
-      const userID = await getID();
-      const materialUUID = material?.data[selectedSegment]?.uuid;
-      const materialSlug = material?.data[selectedSegment]?.slug;
-
-      const formattedAnswers = answers.map((answer) => {
-        const question = material?.data[selectedSegment]?.questions.find(
-          (q: any) => q.id === answer.questionId
-        );
-
-        if (question && question.item) {
-          const answerItem = question.item.find((item: any) => item.id === answer.answerId);
-          if (answerItem) {
-            return {
-              id: answer.answerId,
-              title: answerItem.title,
-              status: answer.status,
-            };
-          }
-        }
-
-        return { id: answer.answerId, title: 'Unknown Answer', status: answer.status };
-      });
-
-      // If reportId is null, create a new report (POST), otherwise update the existing one (PUT)
-      if (reportId) {
-        // PUT request to update the existing report
-        await fetch(`https://api-genfiit.yanginibeda.web.id/api/reports/${reportId}`, {
-          method: 'PUT',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            data: {
-              users_permissions_user: userID,
-              material_uuid: materialUUID,
-              material_slug: materialSlug,
-              answer: formattedAnswers,
-              category: selectedTopic === 'Mental' ? 'mentalmodule' : 'gizimodule',
-              is_complete: false,
-            },
-          }),
-        });
-      } else {
-        // POST request to create a new report
-        const response = await fetch('https://api-genfiit.yanginibeda.web.id/api/reports', {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            data: {
-              users_permissions_user: userID,
-              material_uuid: materialUUID,
-              material_slug: materialSlug,
-              answer: formattedAnswers,
-              category: selectedTopic === 'Mental' ? 'mentalmodule' : 'gizimodule',
-              is_complete: false,
-            },
-          }),
-        });
-
-        const data = await response.json();
-        setReportId(data.id); // Save the report ID to track for PUT requests
-      }
-
-      const nextSegment = selectedSegment + 1;
-      if (nextSegment < material?.data.length) {
-        setSelectedSegment(nextSegment);
-      } else {
-        setSelectedTopic(null);
-        setMaterial(null);
-        setAnswers([]);
-        setIsButtonActive(false);
-        setCompletedSegments(new Array(material?.data.length).fill(false));
-        alert('You have completed all content!');
-        navigation.navigate('PilihKategoriModul');
-      }
-    } catch (error) {
-      console.error('Error submitting answers:', error);
-      alert('Failed to submit answers. Please try again.');
-    }
-  };
-
-  const getDescriptionText = (description: any[]) =>
-    description
-      .map((p) => p.children.map((c: { text: string }) => c.text).join(' '))
-      .join('\n\n');
-
-  if (loading) return <Text>Loading...</Text>;
 
   if (!selectedTopic) {
     return (
@@ -173,13 +34,7 @@ const LearningSessionScreen: React.FC = () => {
           <ScrollView contentContainerStyle={styles.scrollView}>
             <TouchableOpacity
               style={styles.card}
-              onPress={() => {
-                setSelectedTopic('Mental');
-                setMaterial(null);
-                setAnswers([]);
-                setSelectedSegment(0);
-                setReportId(null); // Reset reportId when a new topic is selected
-              }}
+              onPress={() => navigateToContentScreen('Mental')}
             >
               <Image
                 source={require('../../assets/mental-logo.png')}
@@ -189,13 +44,7 @@ const LearningSessionScreen: React.FC = () => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.card}
-              onPress={() => {
-                setSelectedTopic('Gizi');
-                setMaterial(null);
-                setAnswers([]);
-                setSelectedSegment(0);
-                setReportId(null); // Reset reportId when a new topic is selected
-              }}
+              onPress={() => navigateToContentScreen('Gizi')}
             >
               <Image
                 source={require('../../assets/gizi-logo.png')}
@@ -209,86 +58,7 @@ const LearningSessionScreen: React.FC = () => {
     );
   }
 
-  if (!material || material.data.length === 0) return <Text>No material found for {selectedTopic}.</Text>;
-
-  const currentSegment = material.data[selectedSegment];
-  const segmentTitlePrefix = selectedTopic === 'Mental' ? 'Mental Health' : 'Nutrition';
-  const segmentTitle = `${segmentTitlePrefix} - Konten ${selectedSegment + 1}`;
-
-  return (
-    <ResponsiveContainer>
-      <View style={styles.container}>
-        <HeaderComponent title={segmentTitle} />
-        <ScrollView contentContainerStyle={styles.scrollView}>
-          {selectedTopic === 'Gizi' && selectedSegment === 0 && (
-            <Image
-              source={require('../../assets/gizimodul1.png')}
-              style={styles.moduleImage}
-            />
-          )}
-          {selectedTopic === 'Gizi' && selectedSegment === 1 && (
-            <Image
-              source={require('../../assets/gizimodul2.png')}
-              style={styles.moduleImage}
-            />
-          )}
-
-          {selectedTopic === 'Mental' && selectedSegment === 0 && (
-            <Image
-              source={require('../../assets/mental1.png')}
-              style={styles.moduleImage}
-            />
-          )}
-          {selectedTopic === 'Mental' && selectedSegment === 1 && (
-            <Image
-              source={require('../../assets/mental2.png')}
-              style={styles.moduleImage}
-            />
-          )}
-
-          <View style={styles.card}>
-            <Text style={[styles.header, styles.textLeft]}>{currentSegment.title || 'Title not available'}</Text>
-            <Text style={[styles.descriptionText, styles.textLeft]}>
-              {getDescriptionText(currentSegment.description) || 'Description not available'}
-            </Text>
-
-            <FlatList
-              data={currentSegment.questions.slice(0, 2)} // Display 2 questions per segment
-              keyExtractor={(q) => q.id.toString()}
-              renderItem={({ item: question }) => (
-                <View style={styles.questionContainer}>
-                  <Text style={[styles.questionTitle, styles.textLeft]}>{question.title}</Text>
-                  {question.item.map((answer: any) => (
-                    <TouchableOpacity
-                      key={answer.id}
-                      style={[
-                        styles.answerButton,
-                        answers.some((a) => a.questionId === question.id && a.answerId === answer.id) &&
-                          styles.selectedAnswer,
-                      ]}
-                      onPress={() => handleAnswerSelection(question.id, answer.id)}>
-                      <View style={styles.dotContainer}>
-                        <View
-                          style={[
-                            styles.dot,
-                            answers.some((a) => a.questionId === question.id && a.answerId === answer.id) &&
-                              styles.filledDot,
-                          ]}
-                        />
-                        <Text style={styles.answerText}>{answer.title}</Text>
-                      </View>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
-            />
-
-            <ButtonComponent title="Submit Answer" onPress={submitAnswers} disabled={!isButtonActive} />
-          </View>
-        </ScrollView>
-      </View>
-    </ResponsiveContainer>
-  );
+  return null;
 };
 
 const styles = StyleSheet.create({
@@ -297,10 +67,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 20,
-  },
-  textLeft: {
-    textAlign: 'left',
   },
   card: {
     backgroundColor: '#fff',
@@ -324,65 +90,6 @@ const styles = StyleSheet.create({
   cardText: {
     fontSize: 18,
     fontWeight: 'bold',
-  },
-  descriptionText: {
-    fontSize: 16,
-    color: '#333',
-    lineHeight: 24, // Improved readability
-  },
-  questionContainer: {
-    marginBottom: 15,
-    width: "auto",
-  },
-  questionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    flexWrap: 'wrap',
-  },
-  answerButton: {
-    padding: 10,
-    marginVertical: 5,
-    borderRadius: 8,
-    backgroundColor: '#f1f1f1',
-    width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  },
-  answerText: {
-    fontSize: 16,
-    color: '#333',
-    flex: 1, 
-    flexWrap: 'wrap', // Allow the text to wrap
-  },
-  dotContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#ccc',
-    marginRight: 10,
-  },
-  filledDot: {
-    backgroundColor: '#18B2A0',
-  },
-  selectedAnswer: {
-    backgroundColor: '#e0f7f7',
-  },
-  moduleImage: {
-    width: '100%',
-    height: 200,
-    marginBottom: 10,
-    resizeMode: 'contain',
-  },
-  header: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 10,
   },
 });
 

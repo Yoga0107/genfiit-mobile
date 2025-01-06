@@ -13,17 +13,14 @@ import {
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ResponsiveContainer from "../components/ResponsiveContainer";
 import UserCard from "../components/UserCard";
 import WeightBox from "../components/BoxComponents/WeightBox";
-
+import ProgramCard from "../components/ProgramCard";
 import { getToken } from "../utils/handlingDataLogin";
 import { calculateBMI, getNutritionalStatus } from "../helper/bmiHelper";
 import { getUserDetails } from "../api/User";
-import ProgramCard from "../components/ProgramCard";
-import DebugScreen from "../components/ResetButton";
 
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<any>>();
@@ -32,11 +29,14 @@ const HomeScreen: React.FC = () => {
   const [status, setStatus] = useState<string>("");
   const [error, setError] = useState(false);
   const [isPretestCompleted, setIsPretestCompleted] = useState<string | null>(null);
+  const [moduleCompletion, setModuleCompletion] = useState<number>(0);
+  const [mentalCompletion, setMentalCompletion] = useState<number>(0);
+  const [giziCompletion, setGiziCompletion] = useState<number>(0);
 
   // Add a state to manage the pull-to-refresh behavior
   const [refreshing, setRefreshing] = useState(false);
 
-  // Function to fetch user data
+  // Fetch user data
   const fetchUserData = async () => {
     try {
       const data = await getUserDetails();
@@ -51,7 +51,7 @@ const HomeScreen: React.FC = () => {
           name: userDetails.full_name,
           height: userDetails.height,
           weight: userDetails.weight,
-          gender: userDetails.gender, // Assuming gender is available here
+          gender: userDetails.gender,
           bmi,
           status: nutritionalStatus,
         });
@@ -66,39 +66,74 @@ const HomeScreen: React.FC = () => {
     }
   };
 
-  // Function to check if pretest is completed
+  // Check pre-test completion
   const checkPretestCompletion = async () => {
     try {
       const pretestCompleted = await AsyncStorage.getItem('pretestCompleted');
-      console.log('Fetched Pretest Status:', pretestCompleted); // Debugging log
       setIsPretestCompleted(pretestCompleted);
     } catch (error) {
       console.error('Error checking pretest status:', error);
     }
   };
 
-  // Call functions on initial render
+  // Calculate module completion (number of modules completed)
+  const calculateModuleCompletion = async () => {
+    try {
+      const completedModules = [];
+      for (let i = 1; i <= 5; i++) {
+        const completed = await AsyncStorage.getItem(`module_${i}_completed`);
+        if (completed === 'true') {
+          completedModules.push(i);
+        }
+      }
+      setModuleCompletion(completedModules.length); // Show number of completed modules
+    } catch (error) {
+      console.error('Error calculating module completion:', error);
+    }
+  };
+
+  // Fetch the completion data for mental and gizi learning
+  const fetchCompletionData = async () => {
+    try {
+      const mentalCompletedCount = await AsyncStorage.getItem('mentalCompletedCount');
+      const giziCompletedCount = await AsyncStorage.getItem('giziCompletedCount');
+
+      const mentalCompleted = mentalCompletedCount ? parseInt(mentalCompletedCount) : 0;
+      const giziCompleted = giziCompletedCount ? parseInt(giziCompletedCount) : 0;
+
+      setMentalCompletion(mentalCompleted);
+      setGiziCompletion(giziCompleted);
+
+      console.log("Mental Completion:", mentalCompleted);
+      console.log("Gizi Completion:", giziCompleted);
+    } catch (error) {
+      console.error("Error fetching completion data:", error);
+    }
+  };
+
+  // Fetch data initially and on refresh (excluding Pretest/Posttest CTA)
   useEffect(() => {
     fetchUserData();
     checkPretestCompletion();
+    calculateModuleCompletion();
+    fetchCompletionData();
   }, []);
 
   // Refresh handler
   const onRefresh = async () => {
     setRefreshing(true);
-
-    // Re-fetch the user data and pretest completion status
     await fetchUserData();
-    await checkPretestCompletion();
-
+    await calculateModuleCompletion();
+    await fetchCompletionData();
     setRefreshing(false);
   };
 
+  // Navigation to different screens
   const navigateTo = (screen: string) => {
     navigation.navigate(screen);
   };
 
-  // Ensure we are waiting for `isPretestCompleted` to be loaded before rendering
+  // Wait for user data and status to be ready before rendering
   if (loading) {
     return <ActivityIndicator size="large" color="#00b4ac" />;
   }
@@ -106,9 +141,7 @@ const HomeScreen: React.FC = () => {
   return (
     <ResponsiveContainer>
       <ScrollView
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <ImageBackground
           source={require("../../assets/header.png")}
@@ -127,7 +160,7 @@ const HomeScreen: React.FC = () => {
 
         <View style={styles.centerContainer}>
           {error ? (
-            <Text style={styles.errorText}>ERR!</Text>
+            <Text style={styles.errorText}>Error fetching user data!</Text>
           ) : userData ? (
             <UserCard
               name={userData.name}
@@ -162,7 +195,8 @@ const HomeScreen: React.FC = () => {
 
         <View style={styles.programContainer}>
           <View style={styles.cardContainer}>
-            {/* <ProgramCard /> */}
+            <ProgramCard completed={mentalCompletion} title={"Mental Learning"} />
+            <ProgramCard completed={giziCompletion} title={"Gizi Learning"} />
           </View>
         </View>
 
@@ -170,42 +204,39 @@ const HomeScreen: React.FC = () => {
           <WeightBox
             initialWeight={userData.weight}
             height={userData.height}
-            gender={userData.gender} // Now passing gender here
+            gender={userData.gender}
           />
         )}
 
-      <TouchableOpacity
-  onPress={() => {
-    // Log the screen that is about to open based on pretest status
-    console.log("Navigating to screen:", isPretestCompleted === 'true' ? 'Posttest' : 'Pretest');
-    
-    // Check if pretest has been completed, then navigate accordingly
-    if (isPretestCompleted === 'true') {
-      navigation.navigate('Posttest');  // Navigate to PostTestScreen if pretest is completed
-    } else {
-      navigation.navigate('Pretest');  // Navigate to PretestScreen if pretest is not completed
-    }
-  }}
-  style={styles.ctaButton}
->
-  <LinearGradient
-    colors={['#4EAA9F', '#CAA638']}
-    start={[0, 0]}
-    end={[1, 1]}
-    style={styles.gradient}
-  >
-    <Text style={styles.ctaTitle}>
-      {isPretestCompleted === 'true' ? 'Post-Test' : 'Pre-Test'}
-    </Text>
-    <Text style={styles.ctaSubtitle}>
-      {isPretestCompleted === 'true'
-        ? 'Ambil Post-Test mu Sekarang!'
-        : 'Ambil Pre-Test mu Sekarang!'}
-    </Text>
-  </LinearGradient>
-</TouchableOpacity>
-        
-        {/* <DebugScreen /> */}
+        <TouchableOpacity
+          onPress={() => {
+            // Navigate to Pretest/Posttest based on pretest completion
+            if (isPretestCompleted === 'true') {
+              // Navigate to the PosttestScreen
+              navigation.navigate('Posttest');
+            } else {
+              // Navigate to the PretestScreen
+              navigation.navigate('Pretest');
+            }
+          }}
+          style={styles.ctaButton}
+        >
+          <LinearGradient
+            colors={['#4EAA9F', '#CAA638']}
+            start={[0, 0]}
+            end={[1, 1]}
+            style={styles.gradient}
+          >
+            <Text style={styles.ctaTitle}>
+              {isPretestCompleted === 'true' ? 'Post-Test' : 'Pre-Test'}
+            </Text>
+            <Text style={styles.ctaSubtitle}>
+              {isPretestCompleted === 'true'
+                ? 'Ambil Post-Test mu Sekarang!'
+                : 'Ambil Pre-Test mu Sekarang!'}
+            </Text>
+          </LinearGradient>
+        </TouchableOpacity>
       </ScrollView>
     </ResponsiveContainer>
   );
@@ -339,6 +370,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     paddingHorizontal: 16,
   },
+
 });
 
 export default HomeScreen;

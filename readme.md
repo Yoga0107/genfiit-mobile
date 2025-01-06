@@ -63,3 +63,5 @@ For a development build, use the following command:
 3. **APK Build**
    ```bash
    eas build --profile apk
+
+   is backup!

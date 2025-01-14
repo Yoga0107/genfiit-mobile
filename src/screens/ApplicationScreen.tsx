@@ -80,6 +80,7 @@ const ApplicationScreen: React.FC<ApplicationScreenProps> = ({ navigation }) => 
   const handleEditPassword = () => navigation.navigate('ChangePassword');
   const handleBMICalculator = () => navigation.navigate('BMICalculator');
   const handleCertificate = () => navigation.navigate('Certificate');
+  const handleEditProfile = () => navigation.navigate('EditProfile');
 
   const handleLogout = () => {
     // Show confirmation dialog before logging out
@@ -151,29 +152,38 @@ const ApplicationScreen: React.FC<ApplicationScreenProps> = ({ navigation }) => 
 
           <ApplicationButton
             title="BMI Calculator"
-            description="Hitung Body Mass Index (BMI) disini"
+            description="Count Body Mass Index (BMI)"
             icon={require('../../assets/bmi-icon.png')}
             onPress={handleBMICalculator}
             color="#18B2A0"
           />
           <ApplicationButton
             title="Certificate"
-            description="Lihat sertifikat yang kamu dapatkan disini"
+            description="Look your certificate here"
             icon={require('../../assets/certificate-icon.png')}
             onPress={handleCertificate}
             color="#FFD700"
           />
           <ApplicationButton
-            title="Ganti Password"
-            description="Ubah kata sandi akun Anda"
+            title="Change Password"
+            description="Change your password"
             icon={require('../../assets/password-icon.png')}
             onPress={handleEditPassword}
             color="#000000"
           />
+                    {/* <ApplicationButton
+            title="Edit Profile"
+            description="Edit Profile Anda!"
+            icon={require('../../assets/password-icon.png')}
+            onPress={handleEditProfile}
+            color="#000000"
+          /> */}
 
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
             <Text style={styles.logoutText}>Logout</Text>
           </TouchableOpacity>
+          
+
         </View>
       </ScrollView>
     </ResponsiveContainer>

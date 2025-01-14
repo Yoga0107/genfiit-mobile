@@ -1,16 +1,41 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet, ActivityIndicator, Dimensions, Linking } from 'react-native';
+import React from 'react';
+import { View, StyleSheet, ActivityIndicator, Dimensions, Alert } from 'react-native';
+import { WebView, WebViewNavigation } from 'react-native-webview';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../navigation/AppNavigator';
 
 const { width, height } = Dimensions.get('window');
 
-const PostTestScreen: React.FC = () => {
-  // Correct Post-Test URL
+type NavigationProps = StackNavigationProp<RootStackParamList, 'Posttest'>;
+
+const PosttestScreen: React.FC = () => {
+  const navigation = useNavigation<NavigationProps>();
   const jotformUrl = 'https://form.jotform.com/243615245421450';
 
-  useEffect(() => {
-    // Open the Post-Test URL directly when the screen is loaded
-    Linking.openURL(jotformUrl).catch((err) => console.error('Failed to open URL:', err));
-  }, []);
+  const handleWebViewNavigationStateChange = async (navState: WebViewNavigation) => {
+    const { url } = navState;
+
+    if (url.includes('thank-you') || url.includes('submit.jotform.com')) {
+      try {
+        await AsyncStorage.setItem('PosttestCompleted', 'true');
+        console.log('Posttest completed status saved.');
+        Alert.alert(
+          'Form Completed',
+          'Thank you for completing the form!',
+          [
+            {
+              text: 'OK',
+              onPress: () => navigation.navigate('Home'),
+            },
+          ]
+        );
+      } catch (error) {
+        console.error('Error saving Posttest status:', error);
+      }
+    }
+  };
 
   const renderLoadingIndicator = () => (
     <View style={styles.loadingContainer}>
@@ -20,7 +45,15 @@ const PostTestScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {renderLoadingIndicator()}
+      <WebView
+        source={{ uri: jotformUrl }}
+        style={styles.webview}
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+        startInLoadingState={true}
+        renderLoading={renderLoadingIndicator}
+        onNavigationStateChange={handleWebViewNavigationStateChange}
+      />
     </View>
   );
 };
@@ -30,6 +63,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  webview: {
+    flex: 1,
+    width,
+    height,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -38,4 +76,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PostTestScreen;
+export default PosttestScreen;

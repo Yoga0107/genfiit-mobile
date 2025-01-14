@@ -171,10 +171,10 @@ const NotificationScreen: React.FC = () => {
     // Tampilan utama
     return (
         <ResponsiveContainer>
-            <HeaderComponent title="Notifikasi" />
+            <HeaderComponent title="Notification" />
             <View style={styles.container}>
                 {notifications.length === 0 ? (
-                    <Text style={styles.emptyText}>Tidak ada notifikasi tersedia.</Text>
+                    <Text style={styles.emptyText}>There is no notification!</Text>
                 ) : (
                     <FlatList
                         data={notifications}

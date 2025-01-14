@@ -12,23 +12,23 @@ const UserCard: React.FC<UserCardProps> = ({ name, height, weight, status }) => 
   return (
     <View style={styles.card}>
       <View style={styles.greetingContainer}>
-        <Text style={styles.greeting}>Halo,</Text>
+        <Text style={styles.greeting}>Hello,</Text>
         <View style={styles.nameContainer}>
           <Text style={styles.name}>{name}</Text>
         </View>
       </View>
       <View style={styles.infoContainer}>
         <View style={styles.infoRow}>
-          <Text style={styles.label}>Tinggi</Text>
+          <Text style={styles.label}>Height</Text>
           <Text style={styles.value}>{height} Cm</Text>
         </View>
         <View style={styles.infoRow}>
-          <Text style={styles.label}>Berat</Text>
+          <Text style={styles.label}>Weight</Text>
           <Text style={styles.value}>{weight} Kg</Text>
         </View>
       </View>
       <View style={styles.statusContainer}>
-        <Text style={styles.statusLabel}>Status Gizi</Text>
+        <Text style={styles.statusLabel}>Nutrition Status</Text>
         <Text style={styles.statusValue}>{status}</Text>
       </View>
     </View>

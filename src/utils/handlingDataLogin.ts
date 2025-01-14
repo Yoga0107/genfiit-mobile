@@ -50,15 +50,35 @@ export const getCompletionStatus = async () => {
 };
 
 // Delete Completion Status (is_complete)
-
 export const deleteCompletionStatus = async () => {
   try {
-    await AsyncStorage.removeItem('completionStatus');  // Ganti dengan kunci yang digunakan untuk menyimpan status completion
+    await AsyncStorage.removeItem('@completion_status');  // Ganti dengan kunci yang digunakan untuk menyimpan status completion
   } catch (error) {
     console.error('Failed to delete completion status:', error);
   }
 };
 
+// Save user ID
+export const saveIDuserdetail = async (userID: number) => {
+  try {
+    await AsyncStorage.setItem('@user_id', JSON.stringify(userID));
+    console.log("User ID saved:", userID);
+  } catch (error) {
+    console.error('Error saving user ID:', error);
+  }
+};
+
+// Get saved user ID
+export const getIDuserdetail = async () => {
+  try {
+    const userID = await AsyncStorage.getItem('@user_id');
+    console.log("User ID retrieved:", userID);
+    return userID ? JSON.parse(userID) : null; // Mengembalikan null jika tidak ada user ID
+  } catch (error) {
+    console.error('Error getting user ID:', error);
+    return null; // Mengembalikan null jika terjadi error
+  }
+};
 
 export {
   saveToken,

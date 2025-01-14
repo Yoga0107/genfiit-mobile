@@ -8,7 +8,7 @@ import { LoadingContext } from "../context/LoadingContext";
 import LoadingComponent from "../components/LoadingComponent";
 import { LoginApi } from "../api/Auth";
 import { saveToken, saveCompletionStatus } from "../utils/handlingDataLogin";  // Import saveCompletionStatus
-import { saveID } from "../utils/handlingDataRegister";
+import { saveIDuserdetail } from "../utils/handlingDataLogin";  // Import saveIDuserdetail
 
 type LoginScreenProps = {
   onLogin: () => void;
@@ -41,13 +41,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
 
       // Save the token and user ID
       await saveToken(token);
-      await saveID(userId); // Save the user ID as well
+      await saveIDuserdetail(userId); // Use saveIDuserdetail to save the user ID
 
       // Save completion status as true (assuming login means the user is complete)
       await saveCompletionStatus(true);  // Set is_complete to true when login is successful
 
       onLogin();
       navigation.navigate("MainTabs");
+      console.log('id user detail saved: ' )
     } catch (error) {
       console.error("Login failed", error);
       Alert.alert("Login Gagal", "Silakan periksa email dan password Anda.");

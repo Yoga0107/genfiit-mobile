@@ -32,6 +32,7 @@ const HomeScreen: React.FC = () => {
   const [moduleCompletion, setModuleCompletion] = useState<number>(0);
   const [mentalCompletion, setMentalCompletion] = useState<number>(0);
   const [giziCompletion, setGiziCompletion] = useState<number>(0);
+  const [isFinished, setIsFinished] = useState(false);
 
   // Add a state to manage the pull-to-refresh behavior
   const [refreshing, setRefreshing] = useState(false);
@@ -128,6 +129,14 @@ const HomeScreen: React.FC = () => {
     setRefreshing(false);
   };
 
+  useEffect(() => {
+    if (isPretestCompleted === 'true' && 'true') {
+      setIsFinished(true);
+    } else {
+      setIsFinished(false);
+    }
+  }, [isPretestCompleted]);
+
   // Navigation to different screens
   const navigateTo = (screen: string) => {
     navigation.navigate(screen);
@@ -187,7 +196,7 @@ const HomeScreen: React.FC = () => {
             <View style={styles.textContainer}>
               <Text style={styles.telehealthTitle}>Telehealth</Text>
               <Text style={styles.telehealthDescription}>
-                Konsultasi dengan tenaga kesehatan disini!
+              Consult with healthcare professionals here!
               </Text>
             </View>
           </View>
@@ -196,7 +205,7 @@ const HomeScreen: React.FC = () => {
         <View style={styles.programContainer}>
           <View style={styles.cardContainer}>
             <ProgramCard completed={mentalCompletion} title={"Mental Learning"} />
-            <ProgramCard completed={giziCompletion} title={"Gizi Learning"} />
+            <ProgramCard completed={giziCompletion} title={"Nutrition Learning"} />
           </View>
         </View>
 
@@ -210,16 +219,16 @@ const HomeScreen: React.FC = () => {
 
         <TouchableOpacity
           onPress={() => {
-            // Navigate to Pretest/Posttest based on pretest completion
             if (isPretestCompleted === 'true') {
-              // Navigate to the PosttestScreen
+              // Navigate to PosttestScreen
               navigation.navigate('Posttest');
             } else {
-              // Navigate to the PretestScreen
+              // Navigate to PretestScreen
               navigation.navigate('Pretest');
             }
           }}
           style={styles.ctaButton}
+          disabled={isFinished}  // Disable the button if finished
         >
           <LinearGradient
             colors={['#4EAA9F', '#CAA638']}
@@ -232,11 +241,46 @@ const HomeScreen: React.FC = () => {
             </Text>
             <Text style={styles.ctaSubtitle}>
               {isPretestCompleted === 'true'
-                ? 'Ambil Post-Test mu Sekarang!'
-                : 'Ambil Pre-Test mu Sekarang!'}
+                ? 'Take Your Post-Test Now!'
+                : 'Take Your Pre-Test Now!'}
             </Text>
+
+            {/* Finished Overlay */}
+            {isFinished && (
+              <View style={styles.finishedOverlay}>
+                <Text style={styles.finishedText}>Finished</Text>
+              </View>
+            )}
           </LinearGradient>
         </TouchableOpacity>
+
+
+        <TouchableOpacity
+  onPress={async () => {
+    try {
+      // Hapus data pretest dan posttest dari AsyncStorage
+      await AsyncStorage.removeItem('pretestCompleted');
+      await AsyncStorage.removeItem('posttestCompleted');
+      
+      // Reset state
+      setIsPretestCompleted(null);
+      setIsFinished(false);
+
+      console.log('Pretest dan Posttest telah direset!');
+      alert('Pretest dan Posttest telah direset!');
+    } catch (error) {
+      console.error('Error mereset pretest dan posttest:', error);
+      alert('Terjadi kesalahan saat mereset status pretest dan posttest.');
+    }
+  }}
+  style={[styles.ctaButton, { marginTop: 20 }]} // Menambahkan margin atas agar ada jarak dengan tombol sebelumnya
+>
+    <Text style={styles.resetButton}>Reset Pre-Test & Post-Test</Text>
+    <Text style={styles.resetText}>Klik untuk mengatur ulang status pretest dan posttest</Text>
+</TouchableOpacity>
+
+
+
       </ScrollView>
     </ResponsiveContainer>
   );
@@ -370,6 +414,41 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     paddingHorizontal: 16,
   },
+  finishedOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.4)", 
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 15, 
+    zIndex: 2,  
+  },
+  finishedText: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#fff",
+    textAlign: "center",
+    textTransform: "uppercase",  // Makes text uppercase
+    letterSpacing: 2,  // Adds space between letters
+  },
+  resetButton: {
+    backgroundColor: '#3498DB',
+    borderRadius: 8,
+    padding: 15,
+    marginVertical: 10,
+    alignItems: 'center',
+    width: '90%',
+    alignSelf: 'center',
+  },
+  resetText: {
+    fontSize: 16,
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+
 
 });
 

@@ -56,7 +56,7 @@ const DetailedUserCard: React.FC<DetailedUserCardProps> = ({ name, height, weigh
       </View>
 
       <View style={styles.bmrSection}>
-        <Text style={styles.bmrLabel}>Kebutuhan Energi</Text>
+        <Text style={styles.bmrLabel}>Basal Metabolic Rate</Text>
         <Text style={styles.bmrValue}>{bmr} Kalori</Text>
       </View>
 

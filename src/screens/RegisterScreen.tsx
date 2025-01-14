@@ -5,11 +5,12 @@ import InputComponent from "../components/InputComponent";
 import ButtonComponent from "../components/Button/ButtonComponent";
 import ResponsiveContainer from "../components/ResponsiveContainer";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
-import AlertModal from '../components/AlertModal';
+// import AlertModal from '../components/AlertModal';
 import SuccessModal from '../components/SuccessModal';
 import { RegisterApi } from "../api/Auth";
 import { saveID } from "../utils/handlingDataRegister"; 
 import { saveToken } from "../utils/handlingDataLogin"; 
+import AlertModal from "../components/Alerts/AlertModal";
 
 const RegisterScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<any>>();
@@ -86,11 +87,10 @@ const RegisterScreen: React.FC = () => {
       }, 2000); 
     
     } catch (error) {
-      const errMessage = (error as Error).message;
-      setAlertMessage('Registrasi gagal: ' + errMessage);
+      setAlertMessage('Data Already Exist! Please input with different data!');
       setAlertVisible(true);
     }
-  };
+  };                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
 
   const openTerms = () => {
     Linking.openURL('https://example.com/syarat-ketentuan.pdf');
@@ -171,8 +171,8 @@ const RegisterScreen: React.FC = () => {
         <AlertModal
           visible={alertVisible}
           message={alertMessage}
-          onClose={() => setAlertVisible(false)}
-        />
+          onClose={() => setAlertVisible(false)} 
+          type={"success"}        />
 
         <SuccessModal
           visible={successVisible}

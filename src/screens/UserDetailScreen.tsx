@@ -4,13 +4,13 @@ import {
   Text,
   StyleSheet,
   Image,
-  Alert,
   TouchableOpacity,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { MaterialIcons } from "@expo/vector-icons";
 import InputComponent from "../components/InputComponent";
 import CustomButton from "../components/Button/CustomButton";
+import AlertModal from "../components/AlertModal"; // Import your AlertModal
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
@@ -34,6 +34,9 @@ const UserDetailScreen: React.FC = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
 
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+
   useEffect(() => {
     const fetchUserId = async () => {
       const id = await getID();
@@ -55,19 +58,24 @@ const UserDetailScreen: React.FC = () => {
     }
   };
 
+  const showAlert = (message: string) => {
+    setAlertMessage(message);
+    setAlertVisible(true);
+  };
+
   const handleSubmit = async () => {
     const token = await getToken();
-  
+
     if (!userId || !token || !dateOfBirth) {
-      Alert.alert("Error", "Please fill in all fields.");
+      showAlert("Please fill in all fields.");
       return;
     }
-  
+
     const epochDob = Math.floor(dateOfBirth.getTime() / 1000);
     const age = new Date().getFullYear() - dateOfBirth.getFullYear();
     const monthDifference = new Date().getMonth() - dateOfBirth.getMonth();
     const finalAge = monthDifference < 0 ? age - 1 : age;
-  
+
     const userDetails = {
       full_name: fullName,
       height: parseFloat(height),
@@ -75,32 +83,49 @@ const UserDetailScreen: React.FC = () => {
       age: finalAge,
       dob: epochDob,
       gender: gender,
-      // Assuming users_permissions_user needs to be set this way
       users_permissions_user: {
         data: {
-          id: userId.toString(),  // Make sure the ID is being passed correctly
+          id: userId.toString(),
         },
       },
     };
-  
+
     try {
       await UserDetailApi(userDetails, token, userId.toString());
-      Alert.alert("Success", "User details submitted successfully.");
+      showAlert("User details submitted successfully.");
       navigation.navigate("MainTabs");
     } catch (error: any) {
-      Alert.alert("Error", error.response?.data?.error?.message || "Failed to submit user details.");
+      showAlert(
+        error.response?.data?.error?.message || "Failed to submit user details."
+      );
     }
   };
-  
 
   return (
     <View style={styles.container}>
-      <Image source={require("../../assets/login-chara.png")} style={styles.image} />
+      <Image
+        source={require("../../assets/login-chara.png")}
+        style={styles.image}
+      />
       <Text style={styles.title}>Data Diri</Text>
       <Text style={styles.subtitle}>Sebelum kita lanjut, kenalan dulu yuk!</Text>
-      <InputComponent placeholder="Nama Lengkap" value={fullName} onChangeText={setFullName} />
-      <InputComponent placeholder="Tinggi (cm)" value={height} onChangeText={setHeight} keyboardType="numeric" />
-      <InputComponent placeholder="Berat (kg)" value={weight} onChangeText={setWeight} keyboardType="numeric" />
+      <InputComponent
+        placeholder="Nama Lengkap"
+        value={fullName}
+        onChangeText={setFullName}
+      />
+      <InputComponent
+        placeholder="Tinggi (cm)"
+        value={height}
+        onChangeText={setHeight}
+        keyboardType="numeric"
+      />
+      <InputComponent
+        placeholder="Berat (kg)"
+        value={weight}
+        onChangeText={setWeight}
+        keyboardType="numeric"
+      />
       <TouchableOpacity onPress={openDatePicker} style={styles.datePicker}>
         <Text style={styles.datePickerText}>
           {dateOfBirth ? dateOfBirth.toLocaleDateString() : "Tanggal Lahir"}
@@ -108,16 +133,30 @@ const UserDetailScreen: React.FC = () => {
         <MaterialIcons name="calendar-today" size={24} color="#0FA18C" />
       </TouchableOpacity>
       {showDatePicker && (
-        <DateTimePicker value={dateOfBirth || new Date()} mode="date" display="default" onChange={onDateChange} />
+        <DateTimePicker
+          value={dateOfBirth || new Date()}
+          mode="date"
+          display="default"
+          onChange={onDateChange}
+        />
       )}
       <View style={styles.pickerContainer}>
-        <Picker selectedValue={gender} onValueChange={(itemValue) => setGender(itemValue)} style={styles.picker}>
+        <Picker
+          selectedValue={gender}
+          onValueChange={(itemValue) => setGender(itemValue)}
+          style={styles.picker}
+        >
           <Picker.Item label="Gender" value="" />
           <Picker.Item label="Laki-laki" value="male" />
           <Picker.Item label="Perempuan" value="female" />
         </Picker>
       </View>
       <CustomButton title="Lanjutkan" onPress={handleSubmit} />
+      <AlertModal
+        visible={alertVisible}
+        message={alertMessage}
+        onClose={() => setAlertVisible(false)}
+      />
     </View>
   );
 };

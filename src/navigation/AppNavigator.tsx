@@ -25,6 +25,7 @@ import QuestionSessionScreen from '../screens/QuestionSessionScreen';
 import PretestScreen from '../screens/PretestScreen';
 import ContentScreen from '../screens/ContentScreen';
 import ContentDetailScreen from '../screens/ContentDetailScreen';
+import PostTestScreen from '../screens/PostestScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -164,7 +165,7 @@ const AppNavigator: React.FC = () => {
         />
         <Stack.Screen
           name="Posttest"
-          component={PretestScreen}
+          component={PostTestScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen

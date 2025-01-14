@@ -212,7 +212,7 @@ const ForumScreen: React.FC = () => {
       <HeaderComponent title="Forum" />
       <Image source={require('../../assets/forum-chara.png')} style={styles.headerImage} />
       <Text style={styles.descriptionText}>
-          Disini merupakan tempat untuk kalian yang ingin mengungkapkan mengenai Gizi ataupun Kesehatan mental. Mari curahkan disini!
+      This is a place for those who want to express themselves about Nutrition or Mental Health. Feel free to share here!
         </Text>
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.descriptionContainer}>

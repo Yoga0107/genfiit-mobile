@@ -2,6 +2,7 @@
 
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { calculateBBI } from "../../helper/bbiHelper";
 
 type WeightBoxProps = {
   initialWeight: number; // Berat user dalam kg
@@ -16,9 +17,9 @@ const WeightBox: React.FC<WeightBoxProps> = ({ initialWeight, height, gender }) 
     return weight / (heightInMeters * heightInMeters);
   };
 
-  // Menghitung Berat Badan Ideal (BBI)
+// bbi formula
   const calculateBBI = (height: number, gender: string) => {
-    return gender === "male" ? (height - 100) - (0.1 * (height - 100)) : (height - 100) - (0.15 * (height - 100));
+    return gender === "male" ? (height - 100) - (0.1 * (height - 100)) : (height - 100) - (0.1 * (height - 100));
   };
 
   // Menentukan status berdasarkan IMT
@@ -49,20 +50,20 @@ const WeightBox: React.FC<WeightBoxProps> = ({ initialWeight, height, gender }) 
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Indeks Massa Tubuh (IMT)</Text>
+      <Text style={styles.title}>Body Mass Index</Text>
       <View style={styles.content}>
         <View style={styles.weightContainer}>
           <Text style={styles.weightValue}>{initialWeight} kg</Text>
-          <Text style={styles.weightLabel}>Berat Awal</Text>
+          <Text style={styles.weightLabel}>Initial Weight</Text>
         </View>
         <View style={styles.barContainer}>
           <View style={[styles.bar, { backgroundColor: color }]} />
           <Text style={[styles.imtStatus, { color }]}>{status}</Text>
-          <Text style={styles.imtValue}>IMT: {imt.toFixed(1)}</Text>
+          <Text style={styles.imtValue}>{imt.toFixed(1)}</Text>
         </View>
         <View style={styles.weightContainer}>
           <Text style={styles.weightValue}>{bbi.toFixed(1)} kg</Text>
-          <Text style={styles.weightLabel}>BBI</Text>
+          <Text style={styles.weightLabel}>Ideal Weight</Text>
         </View>
       </View>
     </View>

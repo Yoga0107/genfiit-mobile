@@ -1,13 +1,28 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Alert, Dimensions, RefreshControl, Image } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import HeaderComponent from '../components/Header';  
-import { getCompletionStatus } from '../utils/handlingDataLogin';  
-import { getUserDetails } from '../api/User';  
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+  TouchableOpacity,
+  Alert,
+  Dimensions,
+  RefreshControl,
+  Image,
+} from 'react-native';
+import HeaderComponent from '../components/Header';
+import { getCompletionStatus } from '../utils/handlingDataLogin';
+import { getUserDetails } from '../api/User';
 import ResponsiveContainer from '../components/ResponsiveContainer';
-import Canvas from 'react-native-canvas';  
-import * as FileSystem from 'expo-file-system';  
-import * as MediaLibrary from 'expo-media-library';  
+import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
+import * as Print from 'expo-print';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Sharing from 'expo-sharing';
+import { Asset } from 'expo-asset';
+
+
 
 const { width } = Dimensions.get('window');
 
@@ -17,11 +32,38 @@ const CertificateScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const canvasRef = useRef<Canvas | null>(null);  
+  const getToken = async () => {
+    try {
+      return await AsyncStorage.getItem('token');
+    } catch (error) {
+      console.error('Error fetching token:', error);
+    }
+  };
 
   const fetchCompletionStatus = async () => {
-    const status = await getCompletionStatus();
-    setCompletionStatus(status);  
+    const token = await getToken();
+    if (!token) {
+      console.log('Token not found');
+      return;
+    }
+    try {
+      const response = await fetch('https://api-genfiit.yanginibeda.web.id/api/users/me', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (data?.is_complete) {
+        setCompletionStatus(true);
+      } else {
+        setCompletionStatus(false);
+      }
+    } catch (error) {
+      console.error('Error fetching completion status:', error);
+    }
   };
 
   const fetchUserData = async () => {
@@ -30,8 +72,8 @@ const CertificateScreen: React.FC = () => {
       const data = await getUserDetails();
       setUserData(data?.user_detail?.information);
     } catch (error) {
-      console.error("Error fetching user data:", error);
-      Alert.alert("Error", "Gagal mengambil data pengguna");
+      console.error('Error fetching user data:', error);
+      Alert.alert('Error', 'Gagal mengambil data pengguna');
     } finally {
       setLoading(false);
     }
@@ -45,84 +87,75 @@ const CertificateScreen: React.FC = () => {
   };
 
   useEffect(() => {
+    console.log('Fetching completion status...');
     fetchCompletionStatus();
     fetchUserData();
   }, []);
 
-  const generateCertificateImage = (name: string, module: string) => {
-    if (canvasRef.current) {
-      const canvas = canvasRef.current;
-      const context = canvas.getContext('2d');
-    
-      canvas.width = 900;
-      canvas.height = 650;
-    
-      context.fillStyle = '#00b4ac';  
-      context.fillRect(0, 0, canvas.width, canvas.height);
-    
-      context.lineWidth = 10;
-      context.strokeStyle = '#ffffff';  
-      context.shadowColor = '#000000'; 
-      context.shadowBlur = 20;
-      context.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
-      context.shadowBlur = 0;  
-    
-      context.font = 'bold 55px "Arial"';
-      context.fillStyle = '#ffffff'; 
-      context.textAlign = 'center';
-      context.fillText('CERTIFICATE OF COMPLETION', canvas.width / 2, 100);
-    
-      context.font = 'italic 35px "Arial"';
-      context.fillStyle = '#ffffff'; 
-      context.fillText(`Presented to: ${name}`, canvas.width / 2, 220);
-    
-      context.font = 'bold 30px "Arial"';
-      context.fillStyle = '#ffffff'; 
-      context.fillText(`For Completing the Module:`, canvas.width / 2, 300);
-      context.font = 'bold 32px "Arial"';
-      context.fillText(module, canvas.width / 2, 350);
-    
-      const date = new Date();
-      context.font = 'italic 22px "Arial"';
-      context.fillStyle = '#ffffff';
-      context.fillText(`Date: ${date.toLocaleDateString()}`, canvas.width / 2, 420);
-    
-      context.fillStyle = '#ffffff';  
-      context.font = 'bold 100px Arial'; 
-      context.fillText('🏆', canvas.width / 2 - 2, canvas.height - 100); 
-    
-      canvas.toDataURL().then(async (dataUrl) => {
-        try {
-          const path = FileSystem.documentDirectory + `sertifikat_${name}_${module}.png`;
-    
-          await FileSystem.writeAsStringAsync(path, dataUrl.replace('data:image/png;base64,', ''), {
-            encoding: FileSystem.EncodingType.Base64,
-          });
-    
-          Alert.alert("Certificate Saved", `Your certificate has been saved to ${path}`);
-    
-          const { status } = await MediaLibrary.requestPermissionsAsync();
-          if (status === 'granted') {
-            const asset = await MediaLibrary.createAssetAsync(path);
-            await MediaLibrary.createAlbumAsync('Certifications', asset, false); 
-            Alert.alert("Saved to Gallery", "Certificate has been saved to your gallery.");
-          } else {
-            Alert.alert("Permission Denied", "Unable to save to gallery.");
-          }
-        } catch (error) {
-          console.error("Error saving certificate:", error);
-          Alert.alert("Error", "Failed to save certificate.");
-        }
+  const generateCertificateImage = async (name: string, module: string) => {
+    try {
+      // Load the local asset using Expo Asset
+      const asset = Asset.fromModule(require('../../assets/genfiit-certif.png'));
+      await asset.downloadAsync();  // Ensure the asset is fully loaded
+  
+      // Get the local file URI for the image
+      const imageUri = asset.uri;
+  
+      // Generate HTML content with the image URL
+      const html = `
+        <html>
+          <body style="display: flex; justify-content: center; align-items: center; height: 100%; margin: 0;">
+            <div style="position: relative; text-align: center; font-family: Arial;">
+              <!-- Background Image -->
+              <img src="${imageUri}" style="width: 100%; max-width: 600px; height: auto;"/>
+  
+              <!-- Text over the image -->
+              <p style="position: absolute; top: 35%; left: 50%; transform: translateX(-50%); color: #000; font-size: 24px;"><strong>${name}</strong></p>
+              <p style="position: absolute; top: 47%; left: 50%; transform: translateX(-50%); color: #000; font-size: 18px;">Completing the module: <strong>${module}</strong></p>
+              <p style="position: absolute; top: 60%; left: 50%; transform: translateX(-50%); color: #000; font-size: 11px;">Date: ${new Date().toLocaleDateString()}</p>
+            </div>
+          </body>
+        </html>
+      `;
+  
+      // Generate the PDF file and get its URI
+      const { uri } = await Print.printToFileAsync({ html });
+      console.log('Generated PDF URI:', uri);
+  
+      // Set the destination path for the PDF file in the document directory
+      const fileUri = FileSystem.documentDirectory + `certificate_${name}_${module}.pdf`;
+  
+      // Move the generated file to the document directory
+      await FileSystem.moveAsync({
+        from: uri,
+        to: fileUri,
       });
+  
+      console.log('Moved file to:', fileUri);
+  
+      // Check if sharing is available
+      const canShare = await Sharing.isAvailableAsync();
+      if (canShare) {
+        // If sharing is available, share the certificate file
+        await Sharing.shareAsync(fileUri);
+        Alert.alert('Certificate Shared', 'The certificate is ready. You can share it now.');
+      } else {
+        // If sharing is not available, alert user that the certificate is saved
+        Alert.alert('Certificate Saved', 'The certificate is saved. You can open it from your documents folder.');
+      }
+    } catch (error) {
+      console.error('Error generating certificate:', error);
+      Alert.alert('Error', 'Failed to generate certificate.');
     }
   };
   
 
+
   const handleGenerateCertificate = (module: string) => {
     if (userData) {
-      generateCertificateImage(userData?.full_name, module);
+      generateCertificateImage(userData.full_name, module);
     } else {
-      Alert.alert("Error", "Data pengguna tidak ditemukan");
+      Alert.alert('Error', 'Data pengguna tidak ditemukan');
     }
   };
 
@@ -142,23 +175,21 @@ const CertificateScreen: React.FC = () => {
           />
         }
       >
-        {/* Header */}
         <HeaderComponent title="Sertifikat" />
 
         <View style={styles.contentContainer}>
           {completionStatus === false ? (
-            <Text style={styles.noCertificates}>Anda belum memiliki sertifikat.</Text>
+            <Text style={styles.noCertificates}>No Certificate! Finish your module!</Text>
           ) : (
             <>
-              <Text style={styles.certificatesTitle}>Sertifikat Anda:</Text>
+              <Text style={styles.certificatesTitle}>My Certificate</Text>
 
-              {/* Sertifikat 1 */}
               <TouchableOpacity
                 style={[styles.certificateCard, styles.nutritionCard]}
-                onPress={() => handleGenerateCertificate("Nutrition Learning")}
+                onPress={() => handleGenerateCertificate('Nutrition Learning')}
               >
                 <Image 
-                  source={require('../../assets/gizi-certif.png')} 
+                  source={require('../../assets/genfiit-certif.png')} 
                   style={styles.certImage}
                 />
                 <View style={styles.certificateContent}>
@@ -167,13 +198,12 @@ const CertificateScreen: React.FC = () => {
                 </View>
               </TouchableOpacity>
 
-              {/* Sertifikat 2 */}
               <TouchableOpacity
                 style={[styles.certificateCard, styles.mentalHealthCard]}
-                onPress={() => handleGenerateCertificate("Mental Health Learning")}
+                onPress={() => handleGenerateCertificate('Mental Health Learning')}
               >
                 <Image 
-                  source={require('../../assets/mentalhealth-certif.png')} 
+                  source={require('../../assets/genfiit-certif.png')} 
                   style={styles.certImage}
                 />
                 <View style={styles.certificateContent}>
@@ -184,8 +214,6 @@ const CertificateScreen: React.FC = () => {
             </>
           )}
         </View>
-
-        <Canvas ref={canvasRef} style={{ display: 'none' }} />
       </ScrollView>
     </ResponsiveContainer>
   );

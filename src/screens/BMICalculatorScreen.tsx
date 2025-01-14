@@ -180,7 +180,7 @@
 
         <View style={styles.inputContainer}>
           <InputComponent
-            placeholder="Umur"
+            placeholder="Age"
             value={age ? age.toString() : ""}
             onChangeText={(text) => {
               const newAge = Number(text);
@@ -196,13 +196,13 @@
               style={styles.picker}
             >
               <Picker.Item label="Gender" value="" />
-              <Picker.Item label="Laki-laki" value="boys" />
-              <Picker.Item label="Perempuan" value="girls" />
+              <Picker.Item label="Male" value="boys" />
+              <Picker.Item label="Female" value="girls" />
             </Picker>
           </View>
 
           <InputComponent
-            placeholder="Berat Badan (kg)"
+            placeholder="Weight (kg)"
             value={weight ? weight.toString() : ""}
             onChangeText={(text) => {
               const newWeight = Number(text);
@@ -212,7 +212,7 @@
           />
 
           <InputComponent
-            placeholder="Tinggi Badan (cm)"
+            placeholder="Height (cm)"
             value={heightInput ? heightInput.toString() : ""}
             onChangeText={(text) => {
               const newHeight = Number(text);

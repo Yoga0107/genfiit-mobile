@@ -30,7 +30,7 @@ const LearningSessionScreen: React.FC = () => {
     return (
       <ResponsiveContainer>
         <View style={styles.container}>
-          <HeaderComponent title="Pilih Kategori Modul" />
+          <HeaderComponent title="Choose Module Category" />
           <ScrollView contentContainerStyle={styles.scrollView}>
             <TouchableOpacity
               style={styles.card}

@@ -107,28 +107,28 @@ const UserDetailScreen: React.FC = () => {
         source={require("../../assets/login-chara.png")}
         style={styles.image}
       />
-      <Text style={styles.title}>Data Diri</Text>
-      <Text style={styles.subtitle}>Sebelum kita lanjut, kenalan dulu yuk!</Text>
+      <Text style={styles.title}>Personal Data</Text>
+      <Text style={styles.subtitle}>Before we started! Let us know about you!</Text>
       <InputComponent
-        placeholder="Nama Lengkap"
+        placeholder="Full Name"
         value={fullName}
         onChangeText={setFullName}
       />
       <InputComponent
-        placeholder="Tinggi (cm)"
+        placeholder="Height (cm)"
         value={height}
         onChangeText={setHeight}
         keyboardType="numeric"
       />
       <InputComponent
-        placeholder="Berat (kg)"
+        placeholder="Weight (kg)"
         value={weight}
         onChangeText={setWeight}
         keyboardType="numeric"
       />
       <TouchableOpacity onPress={openDatePicker} style={styles.datePicker}>
         <Text style={styles.datePickerText}>
-          {dateOfBirth ? dateOfBirth.toLocaleDateString() : "Tanggal Lahir"}
+          {dateOfBirth ? dateOfBirth.toLocaleDateString() : "Date of Birth"}
         </Text>
         <MaterialIcons name="calendar-today" size={24} color="#0FA18C" />
       </TouchableOpacity>
@@ -147,11 +147,11 @@ const UserDetailScreen: React.FC = () => {
           style={styles.picker}
         >
           <Picker.Item label="Gender" value="" />
-          <Picker.Item label="Laki-laki" value="male" />
-          <Picker.Item label="Perempuan" value="female" />
+          <Picker.Item label="Male" value="male" />
+          <Picker.Item label="Female" value="female" />
         </Picker>
       </View>
-      <CustomButton title="Lanjutkan" onPress={handleSubmit} />
+      <CustomButton title="Continue" onPress={handleSubmit} />
       <AlertModal
         visible={alertVisible}
         message={alertMessage}

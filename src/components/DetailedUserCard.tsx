@@ -36,14 +36,14 @@ const DetailedUserCard: React.FC<DetailedUserCardProps> = ({ name, height, weigh
           <Image source={require("../../assets/iconHeight.png")} style={styles.icon} />
           <View>
             <Text style={styles.infoValue}>{height}</Text>
-            <Text style={styles.infoLabel}>Tinggi (Cm)</Text>
+            <Text style={styles.infoLabel}>Height (Cm)</Text>
           </View>
         </View>
         <View style={styles.infoItem}>
           <Image source={require("../../assets/iconWeight.png")} style={styles.icon} />
           <View>
             <Text style={styles.infoValue}>{weight}</Text>
-            <Text style={styles.infoLabel}>Berat (Kg)</Text>
+            <Text style={styles.infoLabel}>Weight (Kg)</Text>
           </View>
         </View>
         <View style={styles.infoItem}>
@@ -57,7 +57,7 @@ const DetailedUserCard: React.FC<DetailedUserCardProps> = ({ name, height, weigh
 
       <View style={styles.bmrSection}>
         <Text style={styles.bmrLabel}>Basal Metabolic Rate</Text>
-        <Text style={styles.bmrValue}>{bmr} Kalori</Text>
+        <Text style={styles.bmrValue}>{bmr} Calories</Text>
       </View>
 
       <View style={styles.nutrientsSection}>
@@ -67,11 +67,11 @@ const DetailedUserCard: React.FC<DetailedUserCardProps> = ({ name, height, weigh
         </View>
         <View style={styles.nutrientItem}>
           <Text style={styles.nutrientValue}>{nutritionalNeeds.fat}</Text>
-          <Text style={styles.nutrientLabel}>Lemak</Text>
+          <Text style={styles.nutrientLabel}>Fat</Text>
         </View>
         <View style={styles.nutrientItem}>
           <Text style={styles.nutrientValue}>{nutritionalNeeds.carbs}</Text>
-          <Text style={styles.nutrientLabel}>Karbohidrat</Text>
+          <Text style={styles.nutrientLabel}>Carbohydrate</Text>
         </View>
       </View>
     </View>

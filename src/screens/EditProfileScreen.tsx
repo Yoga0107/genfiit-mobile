@@ -28,14 +28,14 @@ const EditProfileScreen: React.FC<EditProfileScreenProps> = ({ navigation }) => 
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [age, setAge] = useState("");
-  const [dob, setDob] = useState<number | null>(null); // Menggunakan epoch untuk tanggal
+  const [dob, setDob] = useState<number | null>(null);
   const [gender, setGender] = useState("male");
-  const [userID, setUserID] = useState<number | null>(null); // Menyimpan userID
-  const [token, setToken] = useState<string | null>(null); // Menyimpan token
+  const [userID, setUserID] = useState<number | null>(null);
+  const [token, setToken] = useState<string | null>(null); 
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
-  // Ambil user ID dan token saat komponen dimuat
+  
   useEffect(() => {
     const fetchData = async () => {
       const token = await getToken();
@@ -47,9 +47,9 @@ const EditProfileScreen: React.FC<EditProfileScreenProps> = ({ navigation }) => 
         return;
       }
 
-      const userID = await getID(); // Ambil ID pengguna yang tersimpan
+      const userID = await getID(); 
       if (userID) {
-        setUserID(userID); // Set ID pengguna
+        setUserID(userID);
       } else {
         setAlertMessage("User ID tidak ditemukan.");
         setAlertVisible(true);
@@ -58,7 +58,7 @@ const EditProfileScreen: React.FC<EditProfileScreenProps> = ({ navigation }) => 
 
       try {
         const response = await fetch(
-          `https://api-genfiit.yanginibeda.web.id/api/users/${userID}?populate=user_detail`, // Gunakan userID yang didapat
+          `https://api-genfiit.yanginibeda.web.id/api/users/${userID}?populate=user_detail`, 
           {
             method: "GET",
             headers: {
@@ -72,10 +72,10 @@ const EditProfileScreen: React.FC<EditProfileScreenProps> = ({ navigation }) => 
         console.log("Response Data:", data);
 
         if (response.ok && data && data.data && data.data.user_detail) {
-          // Extract user detail ID
-          const userDetailID = data.data.user_detail.id; // ID yang perlu digunakan untuk PUT request
+          
+          const userDetailID = data.data.user_detail.id;
           if (userDetailID) {
-            setUserID(userDetailID); // Set userID dari user_detail
+            setUserID(userDetailID); 
           } else {
             setAlertMessage("ID user detail tidak ditemukan.");
             setAlertVisible(true);
@@ -101,7 +101,7 @@ const EditProfileScreen: React.FC<EditProfileScreenProps> = ({ navigation }) => 
     }
 
     if (token && userID) {
-      console.log("User Detail ID:", userID); // Pastikan ID ini sudah benar
+      console.log("User Detail ID:", userID); 
       const requestBody = {
         data: {
           information: {
@@ -109,7 +109,7 @@ const EditProfileScreen: React.FC<EditProfileScreenProps> = ({ navigation }) => 
             height: parseInt(height),
             weight: parseInt(weight),
             age: parseInt(age),
-            dob: dob, // Epoch timestamp
+            dob: dob, 
             gender: gender,
           },
         },
@@ -117,7 +117,7 @@ const EditProfileScreen: React.FC<EditProfileScreenProps> = ({ navigation }) => 
 
       try {
         const response = await fetch(
-          `https://api-genfiit.yanginibeda.web.id/api/user-details/${userID}`, // Menggunakan ID yang didapatkan dari user_detail
+          `https://api-genfiit.yanginibeda.web.id/api/user-details/${userID}`, 
           {
             method: "PUT",
             headers: {
@@ -130,7 +130,7 @@ const EditProfileScreen: React.FC<EditProfileScreenProps> = ({ navigation }) => 
         );
 
         const data = await response.json();
-        console.log("Response Data:", data); // Log response untuk debugging
+        console.log("Response Data:", data); 
 
         if (response.ok) {
           setAlertMessage('Profile telah berhasil diubah!');
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 10,
   },
-  subtitle: {
+  subtitle: { 
     fontSize: 16,
     color: "#777",
     marginBottom: 20,

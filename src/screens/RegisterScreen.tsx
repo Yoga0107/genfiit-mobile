@@ -148,13 +148,13 @@ const RegisterScreen: React.FC = () => {
         <View style={styles.agreementContainer}>
           <Checkbox value={agree} onValueChange={setAgree} />
           <Text style={styles.agreementText}>
-            Saya setuju dengan{' '}
+          I agree with{' '}
             <TouchableOpacity onPress={openTerms}>
-              <Text style={styles.linkText}>Syarat dan Ketentuan</Text>
+              <Text style={styles.linkText}>Terms & Condition</Text>
             </TouchableOpacity>{' '}
-            dan{' '}
+            and{' '}
             <TouchableOpacity onPress={openPrivacyPolicy}>
-              <Text style={styles.linkText}>Kebijakan Privasi</Text>
+              <Text style={styles.linkText}>Privacy Policy</Text>
             </TouchableOpacity>
           </Text>
         </View>
@@ -163,8 +163,8 @@ const RegisterScreen: React.FC = () => {
         
         <TouchableOpacity onPress={() => navigation.navigate("Login")}>
           <Text style={styles.loginText}>
-            Sudah punya akun?{" "}
-            <Text style={styles.loginLink}>Masuk disini!</Text>
+            Have an account?{" "}
+            <Text style={styles.loginLink}>Login here!</Text>
           </Text>
         </TouchableOpacity>
 

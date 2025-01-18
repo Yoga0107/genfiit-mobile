@@ -12,29 +12,24 @@ type NavigationProps = StackNavigationProp<RootStackParamList, 'Posttest'>;
 
 const PosttestScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProps>();
-  const jotformUrl = 'https://form.jotform.com/243615245421450';
+  const jotformUrl = 'https://form.jotform.com/250161785588467';
 
   const handleWebViewNavigationStateChange = async (navState: WebViewNavigation) => {
     const { url } = navState;
 
     if (url.includes('thank-you') || url.includes('submit.jotform.com')) {
       try {
-        await AsyncStorage.setItem('PosttestCompleted', 'true');
-        console.log('Posttest completed status saved.');
+        await AsyncStorage.setItem('posttestCompleted', 'true');
+        navigation.navigate('Home');
         Alert.alert(
           'Form Completed',
-          'Thank you for completing the form!',
-          [
-            {
-              text: 'OK',
-              onPress: () => navigation.navigate('Home'),
-            },
-          ]
+          'Thank you for completing the Post-Test!',
         );
       } catch (error) {
-        console.error('Error saving Posttest status:', error);
+        console.error('Error saving posttest status:', error);
       }
     }
+    
   };
 
   const renderLoadingIndicator = () => (

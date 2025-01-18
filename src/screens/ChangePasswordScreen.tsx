@@ -77,31 +77,31 @@ const ChangePasswordScreen: React.FC = () => {
           style={styles.image}
         />
 
-        <Text style={styles.title}>Ganti Password</Text>
-        <Text style={styles.subtitle}>Silakan masukkan password lama dan baru</Text>
+        <Text style={styles.title}>Change Password</Text>
+        <Text style={styles.subtitle}>Please enter your old & new password here</Text>
 
         <InputComponent 
-          placeholder="Password Lama" 
+          placeholder="Old Password" 
           secureTextEntry 
           value={oldPassword} 
           onChangeText={setOldPassword} 
         />
 
         <InputComponent 
-          placeholder="Password Baru" 
+          placeholder="New Password" 
           secureTextEntry 
           value={newPassword} 
           onChangeText={setNewPassword} 
         />
 
         <InputComponent 
-          placeholder="Konfirmasi Password Baru" 
+          placeholder="Confirmation New Password" 
           secureTextEntry 
           value={confirmNewPassword} 
           onChangeText={setConfirmNewPassword} 
         />
 
-        <ButtonComponent title="Ganti Password" onPress={handleChangePassword} />
+        <ButtonComponent title="Change Password" onPress={handleChangePassword} />
 
         <SuccessAlert
           visible={alertVisible}

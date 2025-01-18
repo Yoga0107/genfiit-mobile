@@ -6,6 +6,7 @@ import HeaderComponent from '../components/Header';
 import { fetchPosts, addPost, deletePost, editPost } from '../api/forumApi';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { BlurView } from 'expo-blur';
+import { getIDuserdetail } from '../utils/handlingDataLogin';
 
 const { width, height } = Dimensions.get('window');
 
@@ -45,13 +46,21 @@ const ForumScreen: React.FC = () => {
 
   const fetchUserID = async () => {
     try {
-      const id: any = await getID();
-      const numericId = id ? parseInt(id, 10) : null;
+      let id: any = await getID();
+      let numericId = id ? parseInt(id, 10) : null;
+  
+      // Jika ID tidak ditemukan, panggil fungsi getIDuserdetail
+      if (!numericId) {
+        id = await getIDuserdetail();
+        numericId = id ? parseInt(id, 10) : null;
+      }
+  
       setUserId(numericId);
     } catch (error) {
       console.error('Error fetching user ID:', error);
     }
   };
+  
 
   const fetchPostsData = async () => {
     try {
@@ -71,14 +80,21 @@ const ForumScreen: React.FC = () => {
       Alert.alert('Validation Error', 'Both title and comment cannot be empty.');
       return;
     }
-
+  
     try {
-      const numericUserId = Number(await getID()) || null;
+      let numericUserId = Number(await getID()) || null;
+  
+      // Jika ID tidak ditemukan atau tidak valid, panggil getIDuserdetail
+      if (!numericUserId) {
+        const fallbackId = await getIDuserdetail();
+        numericUserId = fallbackId ? Number(fallbackId) : null;
+      }
+  
       if (!numericUserId) {
         Alert.alert('Error', 'User ID is missing or invalid.');
         return;
       }
-
+  
       const newPostData = await addPost(newTitle, newComment, numericUserId);
       setPosts((prevPosts) => [newPostData, ...prevPosts]);
       setNewTitle('');
@@ -88,6 +104,7 @@ const ForumScreen: React.FC = () => {
       Alert.alert('Error', 'Failed to add post.');
     }
   };
+  
 
   const handleDeletePost = async () => {
     if (selectedPostId) {
@@ -144,7 +161,7 @@ const ForumScreen: React.FC = () => {
       <View style={styles.postContainer}>
         <Image source={require('../../assets/avatar-chara.png')} style={styles.postImage} />
         <View style={styles.postHeader}>
-          <Text style={styles.postDate}>{new Date(createdAt).toLocaleDateString('id-ID', {
+          <Text style={styles.postDate}>{new Date(createdAt).toLocaleDateString('en-US', {
             weekday: 'long',
             year: 'numeric',
             month: 'long',

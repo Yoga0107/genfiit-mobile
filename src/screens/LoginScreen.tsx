@@ -24,31 +24,55 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
   const handleLogin = async () => {
     loadingContext?.setLoading(true);
     try {
-      const response = await LoginApi({
+      const loginResponse = await LoginApi({
         identifier: email,
         password: password,
       });
-
-      console.log("Response from login API:", response?.data);
-
-      const token = response?.data?.jwt;
-      const user = response?.data?.user;
-      const userId = user?.id; // Assuming the user object has an 'id' field
-
-      if (!token || !userId) {
-        throw new Error("Token or user ID missing in response.");
+  
+      console.log("Response from login API:", loginResponse?.data);
+  
+      const token = loginResponse?.data?.jwt;
+  
+      if (!token) {
+        throw new Error("Token is missing in response.");
       }
-
-      // Save the token and user ID
+  
+      // Save the token
       await saveToken(token);
-      await saveIDuserdetail(userId); // Use saveIDuserdetail to save the user ID
-
+  
+      // Use the saved token to fetch user details
+      const userDetailsResponse = await fetch(
+        "https://api-genfiit.yanginibeda.web.id/api/users/me",
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      if (!userDetailsResponse.ok) {
+        throw new Error("Failed to fetch user details.");
+      }
+  
+      const userDetails = await userDetailsResponse.json();
+      const userId = userDetails?.id; // Assuming the response contains an `id` field
+  
+      if (!userId) {
+        throw new Error("User ID is missing in response.");
+      }
+  
+      // Save the user ID
+      await saveIDuserdetail(userId);
+  
       // Save completion status as true (assuming login means the user is complete)
-      await saveCompletionStatus(true);  // Set is_complete to true when login is successful
-
+      await saveCompletionStatus(true);
+  
       onLogin();
       navigation.navigate("MainTabs");
-      console.log('id user detail saved: ' )
+      console.log("User ID saved:", userId);
     } catch (error) {
       console.error("Login failed", error);
       Alert.alert("Login Gagal", "Silakan periksa email dan password Anda.");
@@ -56,6 +80,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
       loadingContext?.setLoading(false);
     }
   };
+  
 
   return (
     <ResponsiveContainer>
@@ -65,7 +90,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
           style={styles.image}
         />
         <Text style={styles.title}>Login</Text>
-        <Text style={styles.subtitle}>Masuk ke aplikasi</Text>
+        <Text style={styles.subtitle}>Continue to app</Text>
         <InputComponent
           placeholder="Email"
           value={email}
@@ -80,8 +105,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
         <ButtonComponent title="Masuk" onPress={handleLogin} />
         <TouchableOpacity onPress={() => navigation.navigate("Register")}>
           <Text style={styles.registerText}>
-            Belum punya akun?{" "}
-            <Text style={styles.registerLink}>Daftar disini!</Text>
+            Haven't account yet?{" "}
+            <Text style={styles.registerLink}>Register Here!</Text>
           </Text>
         </TouchableOpacity>
       </View>

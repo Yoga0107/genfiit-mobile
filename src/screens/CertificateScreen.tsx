@@ -16,21 +16,22 @@ import { getCompletionStatus } from '../utils/handlingDataLogin';
 import { getUserDetails } from '../api/User';
 import ResponsiveContainer from '../components/ResponsiveContainer';
 import * as FileSystem from 'expo-file-system';
-import * as MediaLibrary from 'expo-media-library';
 import * as Print from 'expo-print';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Sharing from 'expo-sharing';
-import { Asset } from 'expo-asset';
-
-
+import * as MediaLibrary from 'expo-media-library';
+import ViewShot from 'react-native-view-shot';
 
 const { width } = Dimensions.get('window');
+
+
 
 const CertificateScreen: React.FC = () => {
   const [userData, setUserData] = useState<any>(null);
   const [completionStatus, setCompletionStatus] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const certificateRef = React.useRef(null);
 
   const getToken = async () => {
     try {
@@ -50,9 +51,9 @@ const CertificateScreen: React.FC = () => {
       const response = await fetch('https://api-genfiit.yanginibeda.web.id/api/users/me', {
         method: 'GET',
         headers: {
-          'Accept': 'application/json',
+          Accept: 'application/json',
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       const data = await response.json();
@@ -87,60 +88,46 @@ const CertificateScreen: React.FC = () => {
   };
 
   useEffect(() => {
-    console.log('Fetching completion status...');
     fetchCompletionStatus();
     fetchUserData();
   }, []);
 
   const generateCertificateImage = async (name: string, module: string) => {
     try {
-      // Load the local asset using Expo Asset
-      const asset = Asset.fromModule(require('../../assets/genfiit-certif.png'));
-      await asset.downloadAsync();  // Ensure the asset is fully loaded
-  
-      // Get the local file URI for the image
-      const imageUri = asset.uri;
-  
-      // Generate HTML content with the image URL
+      const templateUrl =
+        'https://api-genfiit.yanginibeda.web.id/uploads/Certificate_Genfiit_png_71b5eaffa3.png';
+
       const html = `
         <html>
           <body style="display: flex; justify-content: center; align-items: center; height: 100%; margin: 0;">
             <div style="position: relative; text-align: center; font-family: Arial;">
-              <!-- Background Image -->
-              <img src="${imageUri}" style="width: 100%; max-width: 600px; height: auto;"/>
-  
-              <!-- Text over the image -->
-              <p style="position: absolute; top: 35%; left: 50%; transform: translateX(-50%); color: #000; font-size: 24px;"><strong>${name}</strong></p>
-              <p style="position: absolute; top: 47%; left: 50%; transform: translateX(-50%); color: #000; font-size: 18px;">Completing the module: <strong>${module}</strong></p>
-              <p style="position: absolute; top: 60%; left: 50%; transform: translateX(-50%); color: #000; font-size: 11px;">Date: ${new Date().toLocaleDateString()}</p>
+              <img src="${templateUrl}" style="width: 100%; max-width: 600px; height: auto;"/>
+              <p style="position: absolute; top: 45%; left: 50%; transform: translateX(-50%); color: #000; font-size: 24px;"><strong>${name}</strong></p>
+              <p style="position: absolute; top: 57%; left: 50%; transform: translateX(-50%); color: #000; font-size: 12px; text-align: center; width: 80%; line-height: 1.5;">
+  Successfully completed the <strong>* "${module}" *</strong> Module.<br />
+  Your commitment to learning and professional growth reflects a deep<br />
+  passion for improving lives and promoting holistic health.
+</p>
             </div>
           </body>
         </html>
       `;
-  
-      // Generate the PDF file and get its URI
+      // <p style="position: absolute; top: 47%; left: 50%; transform: translateX(-50%); color: #000; font-size: 18px;">Completing the module: <strong>${module}</strong></p>
+      // <p style="position: absolute; top: 60%; left: 50%; transform: translateX(-50%); color: #000; font-size: 11px;">Date: ${new Date().toLocaleDateString()}</p>
+
       const { uri } = await Print.printToFileAsync({ html });
-      console.log('Generated PDF URI:', uri);
-  
-      // Set the destination path for the PDF file in the document directory
       const fileUri = FileSystem.documentDirectory + `certificate_${name}_${module}.pdf`;
-  
-      // Move the generated file to the document directory
+
       await FileSystem.moveAsync({
         from: uri,
         to: fileUri,
       });
-  
-      console.log('Moved file to:', fileUri);
-  
-      // Check if sharing is available
+
       const canShare = await Sharing.isAvailableAsync();
       if (canShare) {
-        // If sharing is available, share the certificate file
         await Sharing.shareAsync(fileUri);
         Alert.alert('Certificate Shared', 'The certificate is ready. You can share it now.');
       } else {
-        // If sharing is not available, alert user that the certificate is saved
         Alert.alert('Certificate Saved', 'The certificate is saved. You can open it from your documents folder.');
       }
     } catch (error) {
@@ -148,8 +135,6 @@ const CertificateScreen: React.FC = () => {
       Alert.alert('Error', 'Failed to generate certificate.');
     }
   };
-  
-
 
   const handleGenerateCertificate = (module: string) => {
     if (userData) {
@@ -188,8 +173,10 @@ const CertificateScreen: React.FC = () => {
                 style={[styles.certificateCard, styles.nutritionCard]}
                 onPress={() => handleGenerateCertificate('Nutrition Learning')}
               >
-                <Image 
-                  source={require('../../assets/genfiit-certif.png')} 
+                <Image
+                  source={{
+                    uri: 'https://api-genfiit.yanginibeda.web.id/uploads/Certificate_Genfiit_png_71b5eaffa3.png',
+                  }}
                   style={styles.certImage}
                 />
                 <View style={styles.certificateContent}>
@@ -202,8 +189,10 @@ const CertificateScreen: React.FC = () => {
                 style={[styles.certificateCard, styles.mentalHealthCard]}
                 onPress={() => handleGenerateCertificate('Mental Health Learning')}
               >
-                <Image 
-                  source={require('../../assets/genfiit-certif.png')} 
+                <Image
+                  source={{
+                    uri: 'https://api-genfiit.yanginibeda.web.id/uploads/Certificate_Genfiit_png_71b5eaffa3.png',
+                  }}
                   style={styles.certImage}
                 />
                 <View style={styles.certificateContent}>

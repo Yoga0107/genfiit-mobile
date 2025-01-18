@@ -1,102 +1,141 @@
-  import React, { useEffect, useState } from "react";
-  import { View, Text, StyleSheet, Dimensions, ScrollView, Modal, FlatList } from "react-native";
-  import HeaderComponent from "../components/Header";
-  import InputComponent from "../components/InputComponent";
-  import CustomButton from "../components/Button/CustomButton";
-  import { Picker } from "@react-native-picker/picker";
-  import { FontAwesome } from '@expo/vector-icons';
-  import { calculateBMI, getBMICategory } from "../helper/calculateBmiHelper";
-  import { getBmiHistory, postBMIHistory } from "../api/bmiHistory";
-  import { getID } from "../utils/handlingDataRegister";
-  import { getToken } from "../utils/handlingDataLogin";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  ScrollView,
+  Modal,
+  FlatList,
+} from "react-native";
+import HeaderComponent from "../components/Header";
+import InputComponent from "../components/InputComponent";
+import CustomButton from "../components/Button/CustomButton";
+import { Picker } from "@react-native-picker/picker";
+import { FontAwesome } from "@expo/vector-icons";
+import { calculateBMI, getBMICategory } from "../helper/calculateBmiHelper";
+import { getBmiHistory, postBMIHistory } from "../api/bmiHistory";
+import { getToken, getIDuserdetail } from "../utils/handlingDataLogin";
+import { getID } from "../utils/handlingDataRegister";
 
-  const { width } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
-  const BMICalculatorScreen: React.FC = () => {
-    const [age, setAge] = useState<number>(0);
-    const [gender, setGender] = useState<string>("boys");
-    const [weight, setWeight] = useState<number>(0);
-    const [heightInput, setHeight] = useState<number>(0);
-    const [bmi, setBmi] = useState<number | null>(null);
-    const [bmiCategory, setBmiCategory] = useState<string>("");
-    const [modalVisible, setModalVisible] = useState(false);
-    const [history, setHistory] = useState<any[]>([]);
-    const [userId, setUserId] = useState<number | null>(null);
-    const [token, setToken] = useState<string | null>(null);
+const BMICalculatorScreen: React.FC = () => {
+  const [age, setAge] = useState<number>(0);
+  const [gender, setGender] = useState<string>("boys");
+  const [weight, setWeight] = useState<number>(0);
+  const [heightInput, setHeight] = useState<number>(0);
+  const [bmi, setBmi] = useState<number | null>(null);
+  const [bmiCategory, setBmiCategory] = useState<string>("");
+  const [modalVisible, setModalVisible] = useState(false);
+  const [history, setHistory] = useState<any[]>([]);
 
-    useEffect(() => {
-      const loadUserData = async () => {
-        const storedUserId: any = await getID();
-        const storedToken: any = await getToken();
-        setUserId(storedUserId);
-        setToken(storedToken);
-      };
+  useEffect(() => {
+    fetchBMIHistory();
+  }, []);
 
-      loadUserData();
-    }, []);
+  const fetchBMIHistory = async () => {
+    try {
+      const token = await getToken();
+      let userId = await getID();
 
-    const fetchBMIHistory = async () => {
-      if (userId && token) {
-        try {
-          const data = await getBmiHistory(userId, token);
-          setHistory(data.data);
-        } catch (error) {
-          console.error("Failed to fetch BMI history:", error);
-        }
+      if (!userId) {
+        userId = await getIDuserdetail();
+      }
+
+      if (token && userId) {
+        const data = await getBmiHistory();
+        setHistory(data.data);
+      } else {
+        console.error("Token or User ID is missing.");
+      }
+    } catch (error) {
+      console.error("Failed to fetch BMI history:", error);
+    }
+  };
+  const getCategoryIcon = (category: string) => {
+    switch (category.toLowerCase()) {
+      case "kurus ringan":
+      case "kurus":
+        return "user-times"; // Ikon orang kurus
+      case "normal":
+        return "user"; // Ikon orang normal
+      case "gemuk ringan":
+      case "gemuk":
+        return "user-plus"; // Ikon orang gemuk
+      default:
+        return "question-circle"; // Ikon default
+    }
+  };
+
+  const handleCalculateBMI = async () => {
+    if (heightInput === 0 || weight === 0 || age === 0) {
+      console.log("Please ensure all inputs are provided.");
+      return;
+    }
+
+    if (age < 1 || age > 99) {
+      console.log("Age must be between 1 and 99.");
+      setBmiCategory("Age not available");
+      return;
+    }
+
+    const calculatedBMI = calculateBMI(weight, heightInput);
+    setBmi(calculatedBMI);
+
+    const category = getBMICategory(calculatedBMI, age, gender as "boys" | "girls");
+    setBmiCategory(category);
+    setModalVisible(true);
+
+    try {
+      await postBMIHistory(
+        age,
+        gender === "boys" ? "male" : "female",
+        heightInput,
+        weight,
+        calculatedBMI.toFixed(2)
+      );
+      fetchBMIHistory();
+    } catch (error) {
+      console.error("Failed to post BMI history:", error);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    setAge(0);
+    setGender("boys");
+    setWeight(0);
+    setHeight(0);
+    setBmi(null);
+    setBmiCategory("");
+  };
+
+  const renderHistoryItem = ({ item }: { item: any }) => {
+    const category = getBMICategory(
+      item.attributes.result,
+      item.attributes.age,
+      item.attributes.gender === "male" ? "boys" : "girls"
+    );
+    
+
+    const getCategoryBackgroundColor = (category: string) => {
+      switch (category.toLowerCase()) {
+        case "kurus ringan":
+          return "#FFF9C4"; // Kuning
+        case "normal":
+          return "#C8E6C9"; // Hijau
+        case "gemuk ringan":
+          return "#FFE0B2"; // Oranye
+        case "kurus":
+        case "gemuk":
+          return "#FFCDD2"; // Merah
+        default:
+          return "#e9ecef"; // Default
       }
     };
 
-    useEffect(() => {
-      if (userId && token) {
-        fetchBMIHistory();
-      }
-    }, [userId, token]);
-
-    const handleCalculateBMI = async () => {
-      if (heightInput === 0 || weight === 0 || age === 0) {
-        console.log("Please ensure all inputs are provided.");
-        return;
-      }
-
-      if (age < 1 || age > 99) {
-        console.log("Age must be between 1 and 99.");
-        setBmiCategory("Age not available");
-        return;
-      }
-
-      const calculatedBMI = calculateBMI(weight, heightInput);
-      setBmi(calculatedBMI);
-
-      const category = getBMICategory(calculatedBMI, age, gender as "boys" | "girls");
-      setBmiCategory(category);
-      setModalVisible(true);
-
-      try {
-        await postBMIHistory(
-          age,
-          gender === "boys" ? "male" : "female",
-          heightInput,
-          weight,
-          calculatedBMI.toFixed(2)
-        );
-        fetchBMIHistory();
-      } catch (error) {
-        console.error("Failed to post BMI history:", error);
-      }
-    };
-
-    const handleCloseModal = () => {
-      setModalVisible(false);
-      // Reset values when closing the modal
-      setAge(0);
-      setGender("boys");
-      setWeight(0);
-      setHeight(0);
-      setBmi(null);
-      setBmiCategory("");
-    };
-
-    const getCategoryIcon = (category: string) => {
+       const getCategoryIcon = (category: string) => {
       switch (category.toLowerCase()) {
         case "kurus ringan":
         case "kurus":
@@ -110,48 +149,8 @@
           return "question-circle"; // Ikon default
       }
     };
-    
 
-    const getCategoryColor = (category: string) => {
-      switch (category.toLowerCase()) {
-        case "kurus ringan":
-          return "#FFC107"; // Kuning
-        case "normal":
-          return "#0FA18C"; // Hijau
-        case "gemuk ringan":
-          return "#FF9800"; // Oranye
-        case "kurus":
-        case "gemuk":
-          return "#F44336"; // Merah
-        default:
-          return "#333"; // Default warna teks
-      }
-    };
-
-    const renderHistoryItem = ({ item }: { item: any }) => {
-      const category = getBMICategory(
-        item.attributes.result,
-        item.attributes.age,
-        item.attributes.gender === "male" ? "boys" : "girls"
-      );
-      const getCategoryBackgroundColor = (category: string) => {
-        switch (category) {
-          case "Kurus Ringan":
-            return "#FFF9C4"; // Kuning
-          case "Normal":
-            return "#C8E6C9"; // Hijau
-          case "Gemuk Ringan":
-            return "#FFE0B2"; // Oranye
-          case "Kurus":
-          case "Gemuk":
-            return "#FFCDD2"; // Merah
-          default:
-            return "#e9ecef"; // Default
-        }
-
-        
-      }
-      const backgroundColor = getCategoryBackgroundColor(item.attributes.category);
+    const backgroundColor = getCategoryBackgroundColor(category);
 
       return (
         <View style={[styles.historyItem, { backgroundColor }]}>
@@ -331,3 +330,5 @@
   });
 
   export default BMICalculatorScreen;
+
+  

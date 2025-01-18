@@ -67,6 +67,19 @@ const HomeScreen: React.FC = () => {
     }
   };
 
+  const checkTestCompletion = async () => {
+    try {
+      const pretestCompleted = await AsyncStorage.getItem('pretestCompleted');
+      const posttestCompleted = await AsyncStorage.getItem('posttestCompleted');
+  
+      setIsPretestCompleted(pretestCompleted);
+      setIsFinished(posttestCompleted === 'true');
+    } catch (error) {
+      console.error('Error checking test completion:', error);
+    }
+  };
+  
+
   // Check pre-test completion
   const checkPretestCompletion = async () => {
     try {
@@ -113,12 +126,27 @@ const HomeScreen: React.FC = () => {
   };
 
   // Fetch data initially and on refresh (excluding Pretest/Posttest CTA)
-  useEffect(() => {
-    fetchUserData();
-    checkPretestCompletion();
+useEffect(() => {
+  fetchUserData();
+  checkTestCompletion();
+  checkPretestCompletion();
+  calculateModuleCompletion();
+  fetchCompletionData();
+
+  const intervalId = setInterval(() => {
+    console.log("Refreshing ProgramCard data...");
     calculateModuleCompletion();
     fetchCompletionData();
-  }, []);
+  }, 10000); // Refresh every 10 seconds
+
+  // Clear interval when component unmounts
+  return () => {
+    clearInterval(intervalId);
+    console.log("Interval cleared.");
+  };
+  
+}, []);
+
 
   // Refresh handler
   const onRefresh = async () => {
@@ -126,6 +154,8 @@ const HomeScreen: React.FC = () => {
     await fetchUserData();
     await calculateModuleCompletion();
     await fetchCompletionData();
+    await checkPretestCompletion();
+    await checkTestCompletion();
     setRefreshing(false);
   };
 

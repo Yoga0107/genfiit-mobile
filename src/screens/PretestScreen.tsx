@@ -12,7 +12,7 @@ type NavigationProps = StackNavigationProp<RootStackParamList, 'Pretest'>;
 
 const PretestScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProps>();
-  const jotformUrl = 'https://form.jotform.com/243614932431453';
+  const jotformUrl = 'https://form.jotform.com/250161638147455';
 
   const handleWebViewNavigationStateChange = async (navState: WebViewNavigation) => {
     const { url } = navState;
@@ -20,21 +20,16 @@ const PretestScreen: React.FC = () => {
     if (url.includes('thank-you') || url.includes('submit.jotform.com')) {
       try {
         await AsyncStorage.setItem('pretestCompleted', 'true');
-        console.log('Pretest completed status saved.');
+        navigation.navigate('Home');
         Alert.alert(
           'Form Completed',
-          'Thank you for completing the form!',
-          [
-            {
-              text: 'OK',
-              onPress: () => navigation.navigate('Home'),
-            },
-          ]
+          'Thank you for completing the Pre-Test!',
         );
       } catch (error) {
         console.error('Error saving pretest status:', error);
       }
     }
+    
   };
 
   const renderLoadingIndicator = () => (

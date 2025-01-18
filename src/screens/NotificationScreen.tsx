@@ -12,7 +12,7 @@ import ResponsiveContainer from "../components/ResponsiveContainer";
 import HeaderComponent from "../components/Header";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { Linking } from "react-native";
-import { getToken } from "../utils/handlingDataLogin";
+import { getIDuserdetail, getToken } from "../utils/handlingDataLogin";
 import { getID } from "../utils/handlingDataRegister";
 import { generateWhatsAppMessage } from "../helper/WhatsappMessage";
 
@@ -42,10 +42,14 @@ const NotificationScreen: React.FC = () => {
     const fetchNotifications = async () => {
         try {
             const token = await getToken();
-            const id = await getID();
+            let id = await getID();
     
             if (!id || isNaN(Number(id))) {
-                throw new Error("Invalid user ID");
+                // Jika ID tidak ditemukan, gunakan getIDuserdetail
+                id = await getIDuserdetail();
+                if (!id || isNaN(Number(id))) {
+                    throw new Error("Invalid user ID");
+                }
             }
     
             setUserId(Number(id));
@@ -132,7 +136,6 @@ const NotificationScreen: React.FC = () => {
     };
     
 
-
     // Komponen untuk merender tiap notifikasi
     const renderNotification = ({ item }: { item: Notification }) => (
         <NotificationBox
@@ -167,6 +170,7 @@ const NotificationScreen: React.FC = () => {
             </View>
         );
     }
+
 
     // Tampilan utama
     return (

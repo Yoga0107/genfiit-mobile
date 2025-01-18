@@ -1,13 +1,18 @@
 import ApiManager from "./ApiManager";
-import { getToken } from "../utils/handlingDataLogin";
+import { getIDuserdetail, getToken } from "../utils/handlingDataLogin";
 import { getID } from "../utils/handlingDataRegister";
 
 export const postTelehealthData = async (
   data: any,
   selectedProgram: string
 ) => {
-  const token = await getToken();
-  const userId = await getID();
+  let token = await getToken();
+  let userId = await getID();
+
+  // Check if userId is not found, fallback to getIDuserdetail
+  if (!userId) {
+    userId = await getIDuserdetail();
+  }
 
   if (!token || !userId) {
     throw new Error("Token or User ID is missing");

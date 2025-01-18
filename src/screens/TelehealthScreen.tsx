@@ -55,7 +55,7 @@ const TelehealthScreen: React.FC = () => {
           const filteredProfessionals = data.filter((item: any) => {
             if (selectedProgram === "Nutrition") {
               return (
-                item.attributes.job_title === "Nutrisionis" ||
+                item.attributes.job_title === "Nutrisionist" ||
                 item.attributes.job_title === "Dietisien"
               );
             } else if (selectedProgram === "Mental Health") {
@@ -99,8 +99,8 @@ const TelehealthScreen: React.FC = () => {
     if (step === 1) {
       if (!fullName || !weight || !height || !gender || !dateOfBirth) {
         Alert.alert(
-          "Data Tidak Lengkap",
-          "Harap isi semua data pada langkah pertama sebelum melanjutkan.",
+          "Incomplete Data!",
+          "Please fill all the field data!",
           [{ text: "OK" }]
         );
         return;
@@ -122,8 +122,8 @@ const TelehealthScreen: React.FC = () => {
         programme = "Nutrition";
       } else {
         Alert.alert(
-          "Kesalahan Program",
-          "Program yang dipilih tidak valid. Harap coba lagi.",
+          "Application Error",
+          "Choosed program is not valid!",
           [{ text: "OK" }]
         );
         return;
@@ -146,26 +146,26 @@ const TelehealthScreen: React.FC = () => {
         await postTelehealthData(data, selectedProgram);
         navigation.navigate("Home");
         alert(
-          "Data konsultasi berhasil ditambahkan, mohon cek halaman notifikasi untuk melihat konsultasi Anda."
+          "Consultation has been made! Please check notification!"
         );
       } catch (error) {
         Alert.alert(
-          "Gagal Mengirim Data",
-          "Ada masalah saat mengirimkan data, coba lagi.",
+          "Failed send data",
+          "There is problem, Try Again!",
           [{ text: "OK" }]
         );
         console.error("Failed to submit telehealth data:", error);
       }
     } else if (step === 2 && !selectedProgram) {
       Alert.alert(
-        "Program Belum Dipilih",
-        "Harap pilih program konsultasi untuk melanjutkan.",
+        "Program must be choosen!",
+        "Please choose the program!.",
         [{ text: "OK" }]
       );
     } else if (step === 3 && (!selectedProfessional || !selectedProgram)) {
       Alert.alert(
-        "Data Belum Lengkap",
-        "Harap pilih profesional medis sebelum melanjutkan.",
+        "Data incomplete!",
+        "Please choose professionalist to continue!.",
         [{ text: "OK" }]
       );
     }
@@ -181,7 +181,7 @@ const TelehealthScreen: React.FC = () => {
       ageInMonths += 12;
     }
 
-    return `${ageInYears} Tahun ${ageInMonths} Bulan`;
+    return `${ageInYears} Years ${ageInMonths} Month`;
   };
 
   const isButtonDisabled = () => {
@@ -204,31 +204,31 @@ const TelehealthScreen: React.FC = () => {
         {step === 1 && (
           <>
             <Text style={styles.title}>Telehealth</Text>
-            <Text style={styles.subtitle}>Konsultasi dengan Profesional</Text>
+            <Text style={styles.subtitle}>Consultation with professional!</Text>
             <Text style={styles.description}>
-              Sebelum bisa konsultasi langsung dengan tenaga kesehatan, mari isi
-              data diri kamu disini!
+            Before you can consult directly with a health professional, let's fill it in
+            your personal data here!
             </Text>
 
             <InputComponent
-              placeholder="Nama Lengkap"
+              placeholder="Full Name"
               value={fullName}
               onChangeText={setFullName}
             />
             <InputComponent
-              placeholder="Berat (Kg)"
+              placeholder="Weight (Kg)"
               value={weight}
               onChangeText={setWeight}
               keyboardType="numeric"
             />
             <InputComponent
-              placeholder="Tinggi (Cm)"
+              placeholder="Height (Cm)"
               value={height}
               onChangeText={setHeight}
               keyboardType="numeric"
             />
 
-            <Text style={styles.dateLabel}>Tanggal Konsultasi</Text>
+            <Text style={styles.dateLabel}>Consultation Date</Text>
             <TouchableOpacity
               onPress={openDatePicker}
               style={styles.datePicker}
@@ -236,7 +236,7 @@ const TelehealthScreen: React.FC = () => {
               <Text style={styles.datePickerText}>
                 {dateOfBirth
                   ? dateOfBirth.toLocaleDateString()
-                  : "Tanggal Lahir"}
+                  : "Date of Birth"}
               </Text>
               <MaterialIcons name="calendar-today" size={24} color="#0FA18C" />
             </TouchableOpacity>
@@ -256,13 +256,13 @@ const TelehealthScreen: React.FC = () => {
                 style={styles.picker}
               >
                 <Picker.Item label="Gender" value="" />
-                <Picker.Item label="Laki-laki" value="male" />
-                <Picker.Item label="Perempuan" value="female" />
+                <Picker.Item label="Male" value="male" />
+                <Picker.Item label="Female" value="female" />
               </Picker>
             </View>
 
             <ButtonComponent
-              title="Lanjut"
+              title="Contine"
               onPress={handleLanjutPress}
               disabled={isButtonDisabled()}
             />
@@ -272,9 +272,9 @@ const TelehealthScreen: React.FC = () => {
         {/* Step 2 */}
         {step === 2 && (
           <>
-            <Text style={styles.title}>Pilih Program</Text>
+            <Text style={styles.title}>Choose Program</Text>
             <Text style={styles.titleDescription}>
-              Pilih program konsultasi yang kamu butuhkan!
+            Choose the consulting program you need!
             </Text>
 
             <TouchableOpacity
@@ -291,8 +291,8 @@ const TelehealthScreen: React.FC = () => {
               <View style={styles.programTextContainer}>
                 <Text style={styles.programTitle}>Mental Health</Text>
                 <Text style={styles.programDescription}>
-                  Bagi yang ingin konsultasi terkait kesehatan mental, curhat,
-                  atau bagi yang memiliki masalah dalam mengatur emosi.
+                For those who want consultation regarding mental health, confide,
+                or for those who have problems regulating emotions.
                 </Text>
               </View>
             </TouchableOpacity>
@@ -311,14 +311,14 @@ const TelehealthScreen: React.FC = () => {
               <View style={styles.programTextContainer}>
                 <Text style={styles.programTitle}>Nutrition</Text>
                 <Text style={styles.programDescription}>
-                  Bagi yang ingin konsultasi terkait masalah gizi, diet, dan
-                  pola makan sehat.
+                For those who want consultation regarding nutrition, diet and...
+                healthy eating pattern.
                 </Text>
               </View>
             </TouchableOpacity>
 
             <ButtonComponent
-              title="Lanjut"
+              title="Continue"
               onPress={handleLanjutPress}
               disabled={isButtonDisabled()}
             />
@@ -328,9 +328,9 @@ const TelehealthScreen: React.FC = () => {
         {/* Step 3 */}
         {step === 3 && (
           <>
-            <Text style={styles.title}>Pilih Profesional</Text>
+            <Text style={styles.title}>Choose Professional</Text>
             <Text style={styles.titleDescription}>
-              Pilih tenaga profesional yang kamu inginkan.
+            Choose the professional staff you want.
             </Text>
 
             {loading ? (
@@ -354,7 +354,7 @@ const TelehealthScreen: React.FC = () => {
                       {professional.job}
                     </Text>
                     <Text style={styles.professionalDetails}>
-                      Jadwal: {professional.schedule}
+                      Schedule: {professional.schedule}
                     </Text>
                   </TouchableOpacity>
                 ))}
@@ -362,7 +362,7 @@ const TelehealthScreen: React.FC = () => {
             )}
 
             <ButtonComponent
-              title="Lanjut"
+              title="Continue"
               onPress={handleLanjutPress}
               disabled={isButtonDisabled()}
             />

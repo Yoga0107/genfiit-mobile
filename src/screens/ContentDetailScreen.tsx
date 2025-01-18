@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Linking } from 'react-native';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
-import { getToken } from '../utils/handlingDataLogin';
+import { getToken, getIDuserdetail } from '../utils/handlingDataLogin';
 import ResponsiveContainer from '../components/ResponsiveContainer';
 import { getID } from '../utils/handlingDataRegister';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -67,7 +67,10 @@ const ContentDetailScreen: React.FC = () => {
         setLoading(true);
         try {
             const token = await getToken();
-            const userId = await getID();
+            const userIdFromRegister = await getID();
+            const userIdFromDetail = await getIDuserdetail();
+
+            const userId = userIdFromDetail || userIdFromRegister;
 
             if (!token || !userId) {
                 console.log('User is not authenticated.');
@@ -156,11 +159,23 @@ const ContentDetailScreen: React.FC = () => {
 
     const renderParagraph = (paragraph: any, index: number) => (
         <View key={index} style={styles.paragraphContainer}>
-            {paragraph.children.map((child: any, idx: number) => (
-                <Text key={idx} style={styles.paragraphText}>
-                    {child.text}
-                </Text>
-            ))}
+            {paragraph.children.map((child: any, idx: number) => {
+                if (child.type === 'link' && child.url) {
+                    // Render the link as a clickable "Click Here" text
+                    return (
+                        <TouchableOpacity key={idx} onPress={() => Linking.openURL(child.url)}>
+                            <Text style={styles.linkText}>
+                                Click here
+                            </Text>
+                        </TouchableOpacity>
+                    );
+                }
+                return (
+                    <Text key={idx} style={styles.paragraphText}>
+                        {child.text}
+                    </Text>
+                );
+            })}
         </View>
     );
 
@@ -342,7 +357,13 @@ const styles = StyleSheet.create({
         height: 200,
         borderRadius: 10,
         marginBottom: 20,
-    }
+    },
+    linkText: {
+        fontSize: 16,
+        color: '#007BFF',  // Blue color to indicate the link
+        textDecorationLine: 'underline',  // Underline the text for link styling
+        fontWeight: 'bold',  // Make it bold for emphasis
+    },
 });
 
 export default ContentDetailScreen;

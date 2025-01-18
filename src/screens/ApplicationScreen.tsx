@@ -19,6 +19,7 @@ import { calculateBMI, getNutritionalStatus } from '../helper/bmiHelper';
 import ResponsiveContainer from '../components/ResponsiveContainer';
 import { getUserDetails } from '../api/User';
 import ApplicationButton from '../components/Button/ApplicationButton';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
@@ -96,19 +97,19 @@ const ApplicationScreen: React.FC<ApplicationScreenProps> = ({ navigation }) => 
           text: "Ya",
           onPress: async () => {
             try {
-              // Delete token, user ID, and completion status from AsyncStorage
-              await deleteToken();
-              await deleteID();
-              await deleteCompletionStatus();  // Add deleteCompletionStatus here
-
+              // Clear all data from AsyncStorage
+              await AsyncStorage.clear();
+  
               // Refresh the app state (you can use a reload or reset method)
               // Navigate the user to the Login screen after logout
               navigation.reset({
                 index: 0,
-                routes: [{ name: 'Login' }],
+                routes: [{ name: "Login" }],
               });
+  
+              console.log("All AsyncStorage data cleared and user logged out.");
             } catch (error) {
-              console.error('Error during logout:', error);
+              console.error("Error during logout:", error);
             }
           },
         },
@@ -116,6 +117,7 @@ const ApplicationScreen: React.FC<ApplicationScreenProps> = ({ navigation }) => 
       { cancelable: false }
     );
   };
+  
 
   if (loading) {
     return <ActivityIndicator size="large" color="#00b4ac" />;

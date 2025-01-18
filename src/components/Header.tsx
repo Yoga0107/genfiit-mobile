@@ -2,17 +2,22 @@ import React from 'react';
 import { Text, View, StyleSheet } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 
 interface HeaderComponentProps {
   title: string;
 }
 
+type RootStackParamList = {
+  HomeScreen: undefined;
+  [key: string]: undefined; // Allow for other routes
+};
+
 const HeaderComponent: React.FC<HeaderComponentProps> = ({ title }) => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const handleBack = () => {
-    navigation.goBack();
+    navigation.navigate('Home'); // Explicitly navigate to HomeScreen
   };
 
   return (

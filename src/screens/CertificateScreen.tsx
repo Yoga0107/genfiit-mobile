@@ -96,39 +96,86 @@ const CertificateScreen: React.FC = () => {
     try {
       const templateUrl =
         'https://api-genfiit.yanginibeda.web.id/uploads/Certificate_Genfiit_png_71b5eaffa3.png';
-
+  
+      // HTML template with full paper layout
       const html = `
         <html>
-          <body style="display: flex; justify-content: center; align-items: center; height: 100%; margin: 0;">
-            <div style="position: relative; text-align: center; font-family: Arial;">
-              <img src="${templateUrl}" style="width: 100%; max-width: 600px; height: auto;"/>
-              <p style="position: absolute; top: 45%; left: 50%; transform: translateX(-50%); color: #000; font-size: 24px;"><strong>${name}</strong></p>
-              <p style="position: absolute; top: 57%; left: 50%; transform: translateX(-50%); color: #000; font-size: 12px; text-align: center; width: 80%; line-height: 1.5;">
-  Successfully completed the <strong>* "${module}" *</strong> Module.<br />
-  Your commitment to learning and professional growth reflects a deep<br />
-  passion for improving lives and promoting holistic health.
-</p>
+          <head>
+            <style>
+              body {
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 100vw;
+                height: 100vh;
+              }
+              .certificate-container {
+                position: relative;
+                width: 100%;
+                height: 100%;
+              }
+              .certificate-container img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                position: absolute;
+              }
+              .certificate-container .name {
+                position: absolute;
+                top: 53%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 72px;
+                font-weight: bold;
+                color: #000;
+                text-align: center;
+              }
+              .certificate-container .module {
+                position: absolute;
+                top: 65%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 24px;
+                color: #000;
+                text-align: center;
+                width: 80%;
+                line-height: 1.5;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="certificate-container">
+              <img src="${templateUrl}" alt="Certificate Background" />
+              <div class="name">${name}</div>
+              <div class="module">Successfully completed the <strong>${module}</strong> module.<br />Your commitment to learning and professional growth reflects a deep passion for improving lives and promoting holistic health.</div>
             </div>
           </body>
         </html>
       `;
-      // <p style="position: absolute; top: 47%; left: 50%; transform: translateX(-50%); color: #000; font-size: 18px;">Completing the module: <strong>${module}</strong></p>
-      // <p style="position: absolute; top: 60%; left: 50%; transform: translateX(-50%); color: #000; font-size: 11px;">Date: ${new Date().toLocaleDateString()}</p>
-
-      const { uri } = await Print.printToFileAsync({ html });
-      const fileUri = FileSystem.documentDirectory + `certificate_${name}_${module}.pdf`;
-
+  
+      // Generate the PDF
+      const { uri } = await Print.printToFileAsync({
+        html,
+        width: 1122, // For A4 dimensions in points (8.5 x 11 inches at 96 PPI)
+        height: 792,
+      });
+  
+      // Save and share the certificate
+      const fileUri = FileSystem.cacheDirectory + `certificate_${name}_${module}.pdf`;
+  
       await FileSystem.moveAsync({
         from: uri,
         to: fileUri,
       });
-
+  
       const canShare = await Sharing.isAvailableAsync();
       if (canShare) {
         await Sharing.shareAsync(fileUri);
         Alert.alert('Certificate Shared', 'The certificate is ready. You can share it now.');
       } else {
-        Alert.alert('Certificate Saved', 'The certificate is saved. You can open it from your documents folder.');
+        Alert.alert('Certificate Saved', 'The certificate has been saved. You can open it from the app.');
       }
     } catch (error) {
       console.error('Error generating certificate:', error);
@@ -160,7 +207,7 @@ const CertificateScreen: React.FC = () => {
           />
         }
       >
-        <HeaderComponent title="Sertifikat" />
+        <HeaderComponent title="Certificate" />
 
         <View style={styles.contentContainer}>
           {completionStatus === false ? (
@@ -242,7 +289,7 @@ const styles = StyleSheet.create({
   },
   certImage: {
     width: width - 32,
-    height: 180,
+    height: 300,
     borderRadius: 10,
     marginBottom: 10,
   },
